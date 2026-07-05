@@ -290,8 +290,8 @@ async function apiMain(s, req, res, u) {
     // 已投递默川 → 无法脱身
     if (s.appliedMochuan) return sendJSON(res, { ok: false, error: 'locked' });
 
-    if (s.dbUnlocked || s.empUnlocked) {
-      // 看过数据库或 HR 后台 → 旁观者：你看见了，却选择离开
+    if (s.dbUnlocked || s.execUnlocked) {
+      // 看过数据库或江远笔记 → 旁观者：你看见了，却选择离开
       s.endingId = 'bystander'; s.endingType = 'bad';
     } else {
       // 什么都没看 → 缄默：没发现什么就注销了
