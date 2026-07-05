@@ -207,27 +207,6 @@
       $('#co-fav').addEventListener('click', function () {
         api('/api/state').then(function (s) { if (!s.profile) { $('#login-mask').classList.add('show'); toast('请先登录'); return; } api('/api/favorite', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug: c.slug, name: c.name }) }).then(function () { toast('已收藏/取消'); }); });
       });
-      // 主动结局：不再关注（bystander）——仅默川页面
-      if (c.slug === 'mochuan-bio') {
-        api('/api/state').then(function (st) {
-          if (!st || !st.profile) return;
-          if (st.progress && st.progress.found >= 3 && !st.appliedMochuan && !(st.ending)) {
-            var wa = document.createElement('button');
-            wa.className = 'btn btn-line btn-sm'; wa.textContent = '不再关注'; wa.style.cssText = 'margin-left:8px;color:#9aa1ab;border-color:#d1d5db';
-            wa.title = '放弃关注此公司';
-            wa.addEventListener('click', function(){
-              if(!window.confirm('你确定不再关注此公司吗？这可能会让你错过一些重要的信息。')) return;
-              fetch('/api/end-action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'walk-away'})})
-                .then(function(r){return r.json()}).then(function(d){
-                  if(d.ok){ document.body.classList.add('dk-glitch'); setTimeout(function(){location.href='/ending.html';},800); }
-                  else toast('无法执行此操作');
-                });
-            });
-            var favBtn = $('#co-fav');
-            if (favBtn) favBtn.parentNode.insertBefore(wa, favBtn.nextSibling);
-          }
-        });
-      }
     });
   }
 
@@ -281,7 +260,7 @@
         if (!s.profile) { $('#center-box').innerHTML = '<div style="padding:40px;text-align:center;color:#6b7280">请先<a href="/">登录</a>。</div>'; return; }
         $('#center-user').textContent = s.profile.name;
         var head = $('.section-head .more');
-        if (head) head.innerHTML = '👤 ' + esc(s.profile.name);
+        if (head) head.innerHTML = '👤 ' + esc(s.profile.name) + ' <a href="#" id="delete-account" style="color:#e5484d;font-size:12px;margin-left:14px;font-weight:400">注销账户</a>';
         $('#c-applied').innerHTML = (s.applied && s.applied.length) ? s.applied.map(function (a) {
           var stages = a.stages || [];
           var mochuan = a.companySlug === 'mochuan-bio';
@@ -303,6 +282,19 @@
     function resumeRows(r) { var rows = [['姓名', 'name'], ['性别', 'gender'], ['出生年月', 'birth'], ['学历', 'edu'], ['院校', 'school'], ['专业', 'major'], ['工作年限', 'years'], ['期望薪资', 'salary'], ['期望城市', 'city'], ['手机', 'phone']]; return '<div class="list-card">' + rows.map(function (x) { return '<div class="list-item"><span class="title">' + x[0] + '</span><span class="date">' + esc(r[x[1]] || '—') + '</span></div>'; }).join('') + '<div class="list-item" style="flex-direction:column;align-items:flex-start;gap:4px"><span class="title">个人优势</span><span style="color:#374151;font-size:13px">' + esc(r.summary || '—') + '</span></div></div>'; }
     $$('.tab').forEach(function (t) { if (t.dataset.ctab) t.addEventListener('click', function () { $$('.tab').forEach(function (x) { x.classList.remove('active'); }); t.classList.add('active'); ['c-applied', 'c-msgs', 'c-resume', 'c-fav'].forEach(function (id) { $('#' + id).style.display = 'none'; }); $('#' + t.dataset.ctab).style.display = ''; if (t.dataset.ctab === 'c-msgs') api('/api/messages/read', { method: 'POST' }); }); });
     renderCenter(); setInterval(renderCenter, 6000);
+    // 注销账户（事件委托，renderCenter 每 6s 重建 DOM）
+    document.addEventListener('click', function(e){
+      if(e.target && e.target.id === 'delete-account'){
+        e.preventDefault();
+        if(!window.confirm('确认注销账户？所有投递记录、简历和站内信将被清除，且无法恢复。')) return;
+        fetch('/api/delete-account',{method:'POST'}).then(function(r){return r.json()}).then(function(d){
+          if(d.ok && d.ending){
+            document.body.classList.add('dk-glitch');
+            setTimeout(function(){location.href='/ending.html';},800);
+          } else toast('无法注销账户');
+        });
+      }
+    });
   }
 
   if (page === 'resume') {

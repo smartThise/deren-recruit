@@ -97,15 +97,7 @@
       var notes = x.notes.map(function (n) { return '<div class="lrow" style="line-height:1.8"><span class="lt">' + n.t + '</span><br/>' + esc(n.text) + '</div>'; }).join('');
       var samples = x.samples.map(function (s) { return '<tr class="' + (/你/.test(s.name) ? 'you' : '') + '"><td>' + s.id + '</td><td>' + esc(s.name) + '</td><td>' + s.days + '</td><td>' + esc(s.physical) + '</td><td>' + esc(s.data) + '</td><td style="color:#9aa1ab">' + esc(s.note) + '</td></tr>'; }).join('');
       $('#view-exec').innerHTML = '<div class="block"><div class="bhead"><span>· 江远的笔记</span><span class="r">私人 · 执行层</span></div><div class="panel">' + notes + '</div></div>' +
-        '<div class="block"><div class="bhead"><span>· 样本池</span><span class="r">完整记录</span></div><div class="panel"><table><thead><tr><th>工号</th><th>样本</th><th>采集天数</th><th>物理主体</th><th>数据</th><th>备注</th></tr></thead><tbody>' + samples + '</tbody></table></div><div class="note">' + esc(x.next) + '</div></div>' +
-        '<div class="block" style="border-color:#5e2a2a"><div class="bhead"><span>· 你要怎么做？</span></div><div class="panel" style="padding:20px;text-align:center"><p style="color:#9aa1ab;font-size:13px;margin:0 0 16px">你已经看完了江远留下的全部记录。你可以去举报，也可以就这样离开。</p><div style="display:flex;gap:16px;justify-content:center"><a href="http://localhost:3753/?q=%E9%BB%98%E5%B7%9D%E7%94%9F%E7%89%A9%E7%A7%91%E6%8A%80" target="_blank" style="display:inline-block;padding:10px 24px;background:#b91c1c;color:#fff;border-radius:5px;text-decoration:none;font-size:13px">去政务平台举报</a><button id="give-up-btn" style="padding:10px 24px;background:#1f2937;color:#6b7280;border:1px solid #374151;border-radius:5px;cursor:pointer;font-size:13px;font-family:inherit">就此离开，不再追究</button></div><div id="give-up-err" style="color:#e5484d;font-size:12px;margin-top:10px;min-height:14px"></div></div></div>';
-      document.getElementById('give-up-btn').addEventListener('click', function(){
-        fetch('/api/end-action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'give-up'})})
-          .then(function(r){return r.json()}).then(function(d){
-            if(d.ok){ document.body.classList.add('dk-glitch'); setTimeout(function(){location.href='http://localhost:3751/ending.html';},800); }
-            else document.getElementById('give-up-err').textContent = '你还不能就此离开。你看到的还不够多。';
-          });
-      });
+        '<div class="block"><div class="bhead"><span>· 样本池</span><span class="r">完整记录</span></div><div class="panel"><table><thead><tr><th>工号</th><th>样本</th><th>采集天数</th><th>物理主体</th><th>数据</th><th>备注</th></tr></thead><tbody>' + samples + '</tbody></table></div><div class="note">' + esc(x.next) + '</div></div>';
     });
   }
 

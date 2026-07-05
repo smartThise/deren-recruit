@@ -16,6 +16,36 @@ const ROOT = __dirname;
 const PUBLIC = path.join(ROOT, 'public');
 const EMP_PUBLIC = path.join(ROOT, 'employer');
 
+// URL 改写（生产模式：localhost:PORT → 路径前缀，子站绝对路径 → 带前缀）
+const IS_RENDER = !!process.env.RENDER;
+const MAIN_ONLY = !!process.env.MAIN_ONLY;
+function rewriteProd(text, sitePrefix) {
+  if (typeof text !== 'string') return text;
+  if (!IS_RENDER && !MAIN_ONLY) return text;
+  // Step 1: 替换 localhost:PORT 跨站引用
+  text = text
+    .replace(/https?:\/\/localhost:8849/g, '/e')
+    .replace(/https?:\/\/localhost:3752/g, '/m')
+    .replace(/https?:\/\/localhost:3753/g, '/g')
+    .replace(/https?:\/\/localhost:3751/g, '');
+  // Step 2: 子站内部绝对路径加前缀
+  if (sitePrefix) {
+    const p = sitePrefix; // e.g. '/e', '/m', '/g'
+    // CSS/JS 资源路径
+    text = text.replace(/(href|src)="\/(css|js)\//g, '$1="' + p + '/$2/');
+    // JS fetch / api() 包装调用
+    text = text.replace(/fetch\('\/api\//g, "fetch('" + p + "/api/");
+    text = text.replace(/fetch\("\/api\//g, 'fetch("' + p + '/api/');
+    text = text.replace(/api\('\/api\//g, "api('" + p + "/api/");
+    text = text.replace(/api\("\/api\//g, 'api("' + p + '/api/');
+    // 页面内链（匹配带或不带 query 参数的内部 HTML 页面）
+    text = text.replace(/href="\/(index\.html|report\.html|products\.html|research\.html|news\.html|db\.html)/g, 'href="' + p + '/$1');
+    // href="/" 回到该子站首页
+    text = text.replace(/(href)="\/"/g, '$1="' + p + '/"');
+  }
+  return text;
+}
+
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8',
@@ -114,8 +144,9 @@ function businessFor(c) {
   const base = { name: c.name, slug: c.slug, code: 'FD-2024-' + codeTail, legal: ['陆怀远', '沈沐', '程晓', '林之衡', '宋予安', '江远'][idx % 6], found: c.found || '2016', capital: ['5000 万', '3000 万', '1000 万', '8000 万', '2000 万', '6000 万'][idx % 6], address: c.address, scope: '技术服务、技术开发、数据处理；软件开发；相关产品销售。', status: '存续（在营）', shareholders: [{ name: base0(idx), pct: '62%' }, { name: '明州某投资合伙企业（有限合伙）', pct: '23%' }, { name: '自然人 ' + base1(idx), pct: '15%' }], history: [{ date: '2022', event: '注册资本变更（增加）' }, { date: '2021', event: '注册地址变更' }, { date: '2020', event: '股东变更' }], related: [] };
   if (c.slug === 'mochuan-bio') { base.related = [{ name: '渊庭生物科技（沄洲）有限公司', code: 'FD-2016-J9X2K', status: '注销', relation: '同注册地址 · 历史股东重合', note: '2024-07 注销，注册地址一致（沄西区渊庭路 88 号 B 座）' }, { name: '默川（明州）健康科技有限公司', code: 'FD-2020-MA0H7', status: '存续', relation: '全资子公司', note: '' }]; base.history.unshift({ date: '2024-07', event: '关联企业"渊庭生物科技"注销' }); base.legal = '江远'; }
   else base.related = [{ name: base0(idx) + '（控股）', code: 'FD-20XX-XXXXXX', status: '存续', relation: '控股股东', note: '' }];
-  base.officialSite = (c.slug === 'mochuan-bio') ? 'http://localhost:3752' : '';
-  base.supervision = 'http://localhost:3753/?q=' + encodeURIComponent(c.name);
+  const prod = IS_RENDER || MAIN_ONLY;
+  base.officialSite = (c.slug === 'mochuan-bio') ? (prod ? '/m/' : 'http://localhost:3752') : '';
+  base.supervision = (prod ? '/g/?q=' : 'http://localhost:3753/?q=') + encodeURIComponent(c.name);
   return base;
 }
 function base0(i) { return ['星河控股集团', '远山健康产业集团', '晨光文化传媒', '蓝鲸供应链集团', '苍穹互娱集团', '默川控股集团'][i % 6]; }
@@ -249,34 +280,24 @@ async function apiMain(s, req, res, u) {
   if (p === '/api/ending-seen' && req.method === 'POST') { s.endingSeen = true; return sendJSON(res, { ok: true }); }
   if (p === '/api/report' && req.method === 'POST') { const b = await readBody(req); if (!s.profile) return sendJSON(res, { ok: false, error: '请先登录' }, 401); s.report = { slug: b.slug, reason: b.reason, t: Date.now() }; return sendJSON(res, { ok: true, reply: '举报已受理，将在 3 个工作日内核查。' }); }
 
-  // 主动结局触发：放弃追查（silent）/ 不再关注（bystander）
-  if (p === '/api/end-action' && req.method === 'POST') {
-    const b = await readBody(req);
-    const have = CLUES.filter(k => s.flags.has(k)); const n = have.length;
-    // 已签约 → consumed 已经接管，不允许其他主动结局
+  // 注销账户 → 触发 silent（未发现什么）/ bystander（已看过 db 或 HR 后台）
+  if (p === '/api/delete-account' && req.method === 'POST') {
+    if (!s.profile) return sendJSON(res, { ok: false, error: '未登录' });
+    // 已签约 → consumed 已经接管
     if (s.appliedMochuan && s.healthAgreed) return sendJSON(res, { ok: false, error: 'locked' });
     // 已举报 → 等待 reported/truth
-    if (s.flags.has('report_mochuan')) return sendJSON(res, { ok: false, error: '已举报，无法放弃' });
-    // 已投递默川 → 无法放弃（已被卷入）
-    if (s.appliedMochuan) return sendJSON(res, { ok: false, error: '你已深陷其中' });
+    if (s.flags.has('report_mochuan')) return sendJSON(res, { ok: false, error: 'locked' });
+    // 已投递默川 → 无法脱身
+    if (s.appliedMochuan) return sendJSON(res, { ok: false, error: 'locked' });
 
-    if (b.action === 'give-up' || b.action === 'silent') {
-      // 需要 ≥8 线索 + exec 才能触发 silent
-      if (n >= 8 && s.flags.has('exec_access')) {
-        s.endingId = 'silent'; s.endingType = 'bad';
-        return sendJSON(res, { ok: true, ending: resolveEnding(s) });
-      }
-      return sendJSON(res, { ok: false, error: 'not enough' });
+    if (s.dbUnlocked || s.empUnlocked) {
+      // 看过数据库或 HR 后台 → 旁观者：你看见了，却选择离开
+      s.endingId = 'bystander'; s.endingType = 'bad';
+    } else {
+      // 什么都没看 → 缄默：没发现什么就注销了
+      s.endingId = 'silent'; s.endingType = 'bad';
     }
-    if (b.action === 'walk-away' || b.action === 'bystander') {
-      // 需要 ≥3 线索
-      if (n >= 3) {
-        s.endingId = 'bystander'; s.endingType = 'bad';
-        return sendJSON(res, { ok: true, ending: resolveEnding(s) });
-      }
-      return sendJSON(res, { ok: false, error: 'not enough' });
-    }
-    return sendJSON(res, { ok: false, error: 'invalid action' });
+    return sendJSON(res, { ok: true, ending: resolveEnding(s) });
   }
 
   // 健康数据协议
@@ -312,29 +333,6 @@ async function apiEmp(s, req, res, u) {
   if (p === '/api/emp/execdata' && req.method === 'GET') {
     if (!s.execUnlocked) return sendJSON(res, { ok: false, locked: true }, 403);
     return sendJSON(res, { ok: true, data: execData(s) });
-  }
-  // 主动结局触发（雇主端复用）
-  if (p === '/api/end-action' && req.method === 'POST') {
-    const b = await readBody(req);
-    const have = CLUES.filter(k => s.flags.has(k)); const n = have.length;
-    if (s.appliedMochuan && s.healthAgreed) return sendJSON(res, { ok: false, error: 'locked' });
-    if (s.flags.has('report_mochuan')) return sendJSON(res, { ok: false, error: '已举报，无法放弃' });
-    if (s.appliedMochuan) return sendJSON(res, { ok: false, error: '你已深陷其中' });
-    if (b.action === 'give-up' || b.action === 'silent') {
-      if (n >= 8 && s.flags.has('exec_access')) {
-        s.endingId = 'silent'; s.endingType = 'bad';
-        return sendJSON(res, { ok: true, ending: resolveEnding(s) });
-      }
-      return sendJSON(res, { ok: false, error: 'not enough' });
-    }
-    if (b.action === 'walk-away' || b.action === 'bystander') {
-      if (n >= 3) {
-        s.endingId = 'bystander'; s.endingType = 'bad';
-        return sendJSON(res, { ok: true, ending: resolveEnding(s) });
-      }
-      return sendJSON(res, { ok: false, error: 'not enough' });
-    }
-    return sendJSON(res, { ok: false, error: 'invalid action' });
   }
   return sendJSON(res, { ok: false, error: 'no route' }, 404);
 }
@@ -439,7 +437,7 @@ function endingOf(s) {
 function resolveEnding(s) {
   if (s.endingId) {
     const have = CLUES.filter(k => s.flags.has(k));
-    const titles = { consumed: '你被录用了', truth: '你查清了，并把它交了出去', silent: '你查清了，却什么也没做', reported: '你举报了', bystander: '你看到了' };
+    const titles = { consumed: '你被录用了', truth: '你查清了，并把它交了出去', silent: '你注销了账户', reported: '你举报了', bystander: '你看到了，却选择离开' };
     return { id: s.endingId, cls: s.endingType === 'good' ? 'best' : s.endingType === 'bad' ? 'bad' : 'mid', title: titles[s.endingId] || '', found: have.length, total: CLUES.length };
   }
   const e = endingOf(s);
@@ -462,60 +460,30 @@ function makeHandler(root, kind) {
     } catch (e) { res.statusCode = 500; res.setHeader('Content-Type', 'text/plain; charset=utf-8'); res.end('500 ' + (e && e.message)); }
   };
 }
-http.createServer(makeHandler(PUBLIC, 'main')).listen(PORT_MAIN, BIND, () => {
-  const line = '─'.repeat(46);
-  console.log('\n\x1b[32m%s\x1b[0m', '得人招聘 · deren.cxn'); console.log(line); console.log('  http://localhost:' + PORT_MAIN); console.log(line + '\n');
-});
-http.createServer(makeHandler(EMP_PUBLIC, 'emp')).listen(PORT_EMP, '127.0.0.1', () => {});
 
-// ---- 默川官网 :3752（纯静态企业宣传站）----
+// ---- 默川官网 handler ----
 const SITE_PUBLIC = path.join(ROOT, 'mochuan-site');
-http.createServer((req, res) => {
+function handleMochuan(req, res) {
   const u = new URL(req.url, 'http://localhost');
   if (u.pathname === '/api/aura' && req.method === 'GET') { const s = getOrCreate(req, res); return sendJSON(res, { endingType: s.endingType, endingId: s.endingId, locked: !!s.locked, endingSeen: !!s.endingSeen }); }
-  if (u.pathname === '/api/db') { const s = getOrCreate(req, res); if (req.method === 'GET') { const gp = u.searchParams.get('pass'); if (gp && gp === 'UWPxRpHgWq==') { s.dbUnlocked = true; res.statusCode = 302; res.setHeader('Location', '/db.html'); return res.end(); } return sendJSON(res, { method: 'POST', body: { pass: 'password', sql: 'query' } }); } if (req.method === 'POST') return readBody(req).then(function (b) { if ((b.pass||'').trim() !== 'UWPxRpHgWq==') return sendJSON(res, { ok: false, error: 'denied' }, 403); s.dbUnlocked = true; const q = (b.sql||'').toLowerCase(); if (q.indexOf('samples')>=0) return sendJSON(res, { ok: true, result: dbSamples(s) }); if (q.indexOf('zero')>=0||q.indexOf('status')>=0) return sendJSON(res, { ok: true, result: dbZero(s) }); return sendJSON(res, { ok: false, error: 'unknown table' }); }); }
+  if (u.pathname === '/api/db') { const s = getOrCreate(req, res); if (req.method === 'GET') { const gp = u.searchParams.get('pass'); if (gp && gp === 'UWPxRpHgWq==') { s.dbUnlocked = true; res.statusCode = 302; res.setHeader('Location', (IS_RENDER||MAIN_ONLY?'/m':'') + '/db.html'); return res.end(); } return sendJSON(res, { method: 'POST', body: { pass: 'password', sql: 'query' } }); } if (req.method === 'POST') return readBody(req).then(function (b) { if ((b.pass||'').trim() !== 'UWPxRpHgWq==') return sendJSON(res, { ok: false, error: 'denied' }, 403); s.dbUnlocked = true; const q = (b.sql||'').toLowerCase(); if (q.indexOf('samples')>=0) return sendJSON(res, { ok: true, result: dbSamples(s) }); if (q.indexOf('zero')>=0||q.indexOf('status')>=0) return sendJSON(res, { ok: true, result: dbZero(s) }); return sendJSON(res, { ok: false, error: 'unknown table' }); }); }
   if (u.pathname === '/db.html') { const s = getOrCreate(req, res); if (!s.dbUnlocked) { res.statusCode = 403; res.setHeader('Content-Type', 'text/html; charset=utf-8'); return res.end('<h1>403 Forbidden</h1>'); } }
   let pn = u.pathname.endsWith('/') ? u.pathname + 'index.html' : u.pathname;
   const full = path.normalize(path.join(SITE_PUBLIC, pn));
   if (!full.startsWith(SITE_PUBLIC)) { res.statusCode = 403; return res.end('403'); }
   fs.readFile(full, (err, data) => {
     if (err) { res.statusCode = 404; res.setHeader('Content-Type', 'text/plain; charset=utf-8'); return res.end('404'); }
-    res.setHeader('Content-Type', MIME[path.extname(full)] || 'text/html; charset=utf-8');
-    res.end(data);
+    const ext = path.extname(full);
+    let body = data.toString('utf8');
+    if ((IS_RENDER || MAIN_ONLY) && ['.html','.js','.css'].includes(ext)) body = rewriteProd(body, '/m');
+    res.setHeader('Content-Type', MIME[ext] || 'text/html; charset=utf-8');
+    res.end(body);
   });
-}).listen(3752, '127.0.0.1', () => {});
-
-// ---- 政务公开网 :3753 ----
-const GOV_PUBLIC = path.join(ROOT, 'gov-site');
-function recordData(q) {
-  const name = (q || '').trim();
-  if (!name) return null;
-  if (name.indexOf('渊庭') >= 0) {
-    return { name: '渊庭生物科技（沄洲）有限公司', status: '注销', licenses: [], penalties: [], inspections: [], complaints: [], note: '主体已于 2024-07-18 注销。历史监管记录随承接主体迁移，详见关联存续主体"默川生物科技"。原招聘平台企业页已归档（archive）。' };
-  }
-  const isMochuan = name.indexOf('默川') >= 0;
-  return {
-    name: isMochuan ? '默川生物科技（沄洲）有限公司' : name,
-    status: '存续（在营）',
-    licenses: isMochuan ? [
-      { name: '高新技术企业认定', no: 'GR2024290115X', date: '2024', valid: '三年' },
-      { name: '医疗器械生产许可证', no: '沄药监械生产许 2023xxxx 号', date: '2023', valid: '五年' },
-      { name: '信息系统安全等级保护三级', no: '290115-35003', date: '2024', valid: '长期' },
-      { name: '人力资源服务许可', no: '沄人服 2024-0287', date: '2024', valid: '三年' }
-    ] : [{ name: '营业执照', no: 'FD-20XX-XXXXXX', date: '——', valid: '长期' }],
-    penalties: [],
-    inspections: [
-      { date: '2025-01', item: '日常监督检查', result: '未发现重大问题', dept: '沄西区市场监督管理局' },
-      { date: '2024-08', item: '数据合规专项检查', result: '已取得被采集方书面授权，未发现违法行为', dept: '沄西区网络安全和信息化委员会办公室' }
-    ],
-    complaints: isMochuan ? [
-      { date: '2024-11', title: '反映"员工健康数据计划"采集范围过宽（睡眠 / 情绪 / 家族病史）', from: '匿名', result: '经核查，企业已取得员工书面授权，依据现行规定未发现违法行为。', status: '已办结' },
-      { date: '2024-09', title: '反映沄西区渊庭路 88 号 B 座夜间有异常灯光与人影', from: '附近居民', result: '现场核查未见异常。', status: '已办结' },
-      { date: '2025-02', title: '（举报内容暂不予公开）', from: '匿名', result: '——', status: '暂存 · 待核实' }
-    ] : []
-  };
 }
-http.createServer((req, res) => {
+
+// ---- 政务公开网 handler ----
+const GOV_PUBLIC = path.join(ROOT, 'gov-site');
+function handleGov(req, res) {
   const u = new URL(req.url, 'http://localhost');
   try {
     if (u.pathname === '/api/aura' && req.method === 'GET') { const s = getOrCreate(req, res); return sendJSON(res, { endingType: s.endingType, endingId: s.endingId, locked: !!s.locked, endingSeen: !!s.endingSeen }); }
@@ -531,8 +499,109 @@ http.createServer((req, res) => {
     if (!full.startsWith(GOV_PUBLIC)) { res.statusCode = 403; return res.end('403'); }
     fs.readFile(full, (err, data) => {
       if (err) { res.statusCode = 404; res.setHeader('Content-Type', 'text/plain; charset=utf-8'); return res.end('404'); }
-      res.setHeader('Content-Type', MIME[path.extname(full)] || 'text/html; charset=utf-8');
-      res.end(data);
+      const ext = path.extname(full);
+      let body = data.toString('utf8');
+      if ((IS_RENDER || MAIN_ONLY) && ['.html','.js','.css'].includes(ext)) body = rewriteProd(body, '/g');
+      res.setHeader('Content-Type', MIME[ext] || 'text/html; charset=utf-8');
+      res.end(body);
     });
   } catch (e) { res.statusCode = 500; res.end('500'); }
-}).listen(3753, '127.0.0.1', () => {});
+}
+
+// ============================================================
+// 部署模式
+// ============================================================
+if (IS_RENDER || MAIN_ONLY) {
+  // ---- 生产模式：单端口，路径前缀路由 ----
+  const P_EMP = '/e';
+  const P_SITE = '/m';
+  const P_GOV = '/g';
+
+  function serveStaticProd(res, root, pathname, prefix) {
+    if (pathname.endsWith('/')) pathname = pathname + 'index.html';
+    const full = path.normalize(path.join(root, pathname));
+    if (!full.startsWith(root)) { res.statusCode = 403; return res.end('403'); }
+    fs.readFile(full, (err, data) => {
+      if (err) {
+        if (root === PUBLIC && !pathname.startsWith('/api/')) {
+          return fs.readFile(path.join(root, '404.html'), (e2, d2) => {
+            if (e2) { res.statusCode = 404; res.setHeader('Content-Type', 'text/plain; charset=utf-8'); return res.end('404'); }
+            res.statusCode = 404; res.setHeader('Content-Type', 'text/html; charset=utf-8'); res.end(rewriteProd(d2.toString('utf8'), prefix));
+          });
+        }
+        res.statusCode = 404; res.setHeader('Content-Type', 'text/plain; charset=utf-8'); return res.end('404');
+      }
+      const ext = path.extname(full);
+      const rewritable = ['.html', '.js', '.css', '.xml', '.txt'].includes(ext);
+      let content = rewritable ? data.toString('utf8') : null;
+      if (content !== null) content = rewriteProd(content, prefix);
+      if (root === PUBLIC && full.endsWith('.html')) {
+        if (content === null) content = data.toString('utf8');
+        if (content.indexOf('</body>') >= 0) content = content.replace('</body>', AURA_INJECT + '</body>');
+      }
+      res.setHeader('Content-Type', MIME[ext] || 'application/octet-stream');
+      res.end(content !== null ? content : data);
+    });
+  }
+
+  // 主站 handler
+  function mainHandler(req, res) {
+    const u = new URL(req.url, 'http://localhost');
+    if (u.pathname.startsWith('/api/')) {
+      if (u.pathname === '/api/archive/enter' && req.method === 'GET') {
+        const s = getOrCreate(req, res);
+        const qp = u.searchParams.get('pass');
+        if (qp && ['0718','20240718','2024-07-18'].includes(qp)) { s.flags.add('archive'); s.archiveUnlocked = true; res.setHeader('Set-Cookie', COOKIE + '=' + s.sid + '; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400'); res.writeHead(302, { 'Location': '/archive/v3/' }); return res.end(); }
+        return sendJSON(res, { ok: false, error: 'invalid pass' });
+      }
+      return apiMain(getOrCreate(req, res), req, res, u);
+    }
+    if (u.pathname.startsWith('/archive/')) {
+      const ss = getOrCreate(req, res);
+      if (!u.pathname.startsWith('/archive/v3/')) { return res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end('<h1>403 Forbidden</h1>'); }
+      if (!ss.archiveUnlocked) { return res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end('<h1>403 Forbidden</h1>'); }
+      if (u.pathname === '/archive/v3/message.html' && !ss.dbUnlocked) { return res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end('<h1>403 Forbidden</h1>'); }
+    }
+    serveStaticProd(res, PUBLIC, u.pathname, '');
+  }
+
+  // 雇主 handler
+  function empHandler(req, res) {
+    const u = new URL(req.url, 'http://localhost');
+    if (u.pathname.startsWith('/api/')) return apiEmp(getOrCreate(req, res), req, res, u);
+    serveStaticProd(res, EMP_PUBLIC, u.pathname, '/e');
+  }
+
+  // 统一调度
+  http.createServer((req, res) => {
+    const u = new URL(req.url, 'http://localhost');
+    try {
+      if (u.pathname.startsWith(P_EMP)) {
+        req.url = req.url.replace(P_EMP, '') || '/';
+        return empHandler(req, res);
+      }
+      if (u.pathname.startsWith(P_SITE)) {
+        req.url = req.url.replace(P_SITE, '') || '/';
+        return handleMochuan(req, res);
+      }
+      if (u.pathname.startsWith(P_GOV)) {
+        req.url = req.url.replace(P_GOV, '') || '/';
+        return handleGov(req, res);
+      }
+      mainHandler(req, res);
+    } catch (e) { res.statusCode = 500; res.setHeader('Content-Type', 'text/plain; charset=utf-8'); res.end('500 ' + (e && e.message)); }
+  }).listen(PORT_MAIN, BIND, () => {
+    console.log('\n\x1b[32m%s\x1b[0m', '得人招聘 · deren.cxn');
+    console.log('  单端口生产模式: ' + PORT_MAIN);
+  });
+
+} else {
+  // ---- 本地开发模式：4 个独立端口 ----
+  http.createServer(makeHandler(PUBLIC, 'main')).listen(PORT_MAIN, BIND, () => {
+    const line = '─'.repeat(46);
+    console.log('\n\x1b[32m%s\x1b[0m', '得人招聘 · deren.cxn'); console.log(line); console.log('  http://localhost:' + PORT_MAIN); console.log(line + '\n');
+  });
+  http.createServer(makeHandler(EMP_PUBLIC, 'emp')).listen(PORT_EMP, '127.0.0.1', () => {});
+  http.createServer(handleMochuan).listen(PORT_SITE, '127.0.0.1', () => {});
+  http.createServer(handleGov).listen(PORT_GOV, '127.0.0.1', () => {});
+}
