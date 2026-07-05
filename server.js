@@ -74,7 +74,7 @@ function getOrCreate(req, res) {
     sessions.set(sid, s);
     created = true;
   }
-  if (res && created && !res.headersSent) res.setHeader('Set-Cookie', `${COOKIE}=${sid}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400`);
+  if (res && created && !res.headersSent) res.setHeader('Set-Cookie', `${COOKIE}=${sid}; Path=/; HttpOnly; SameSite=Lax${IS_RENDER ? '; Secure' : ''}; Max-Age=86400`);
   return s;
 }
 function sendJSON(res, obj, status = 200) { res.statusCode = status; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.end(JSON.stringify(obj)); }
@@ -613,8 +613,12 @@ if (IS_RENDER || MAIN_ONLY) {
     }
     if (u.pathname.startsWith('/archive/')) {
       const ss = getOrCreate(req, res);
-      if (!u.pathname.startsWith('/archive/v3/')) { return res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end('<h1>403 Forbidden</h1>'); }
-      if (!ss.archiveUnlocked) { return res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end('<h1>403 Forbidden</h1>'); }
+      // 仅允许 /archive/ 和 /archive/v3/ 路径
+      if (u.pathname !== '/archive/' && u.pathname !== '/archive/index.html' && !u.pathname.startsWith('/archive/v3/')) {
+        return res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end('<h1>403 Forbidden</h1>');
+      }
+      if (!u.pathname.startsWith('/archive/v3/')) { /* /archive/ 根始终可访问 */ }
+      else if (!ss.archiveUnlocked) { return res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end('<h1>403 Forbidden</h1>'); }
       if (u.pathname === '/archive/v3/message.html' && !ss.dbUnlocked) { return res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end('<h1>403 Forbidden</h1>'); }
     }
     serveStaticProd(res, PUBLIC, u.pathname, '');
