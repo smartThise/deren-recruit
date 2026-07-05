@@ -102,16 +102,20 @@
   fetch('/api/state').then(function(st){
     if(!st||!st.progress)return;
     var clues=st.progress.clues||[];
-    // genesis 已读但 terminal 未读 → 随机信号干扰泄露 terminal 链接
-    if(clues.indexOf('genesis_read')>=0 && clues.indexOf('terminal_read')<0 && Math.random()<.25){
+    // genesis 已读但 terminal 未读 → 首次回首页时信号干扰泄露 terminal 链接
+    if(clues.indexOf('genesis_read')>=0 && clues.indexOf('terminal_read')<0 && !sessionStorage.getItem('sig_leak_shown')){
+      sessionStorage.setItem('sig_leak_shown','1');
       setTimeout(function(){
-        var s=document.createElement('div');
-        s.style.cssText='position:fixed;top:30%;left:50%;transform:translate(-50%,-50%);z-index:10001;pointer-events:none;font-family:monospace;font-size:14px;color:#1a5a1a;background:rgba(0,0,0,.92);padding:12px 20px;border:1px solid #1a3a1a;border-radius:4px;text-shadow:0 0 8px #1a6a1a;opacity:0;transition:opacity .3s';
-        s.textContent='SIGNAL_LEAK ████ B4-NODE-7 ██ /hidden/terminal ██ ██████';
-        document.body.appendChild(s);
-        setTimeout(function(){s.style.opacity='1';},100);
-        setTimeout(function(){s.style.opacity='0';setTimeout(function(){s.remove();},400);},2000+Math.random()*2000);
-      },3000+Math.random()*8000);
+        glitch.flash();
+        setTimeout(function(){
+          var s=document.createElement('div');
+          s.style.cssText='position:fixed;top:35%;left:50%;transform:translate(-50%,-50%);z-index:10001;pointer-events:none;font-family:monospace;font-size:15px;color:#1a5a1a;background:rgba(0,0,0,.95);padding:16px 24px;border:1px solid #1a6a1a;border-radius:4px;text-shadow:0 0 10px #1a6a1a;opacity:0;transition:opacity .2s;text-align:center;line-height:1.8';
+          s.innerHTML='SIGNAL_LEAK :: B4-NODE-7<br>████ <span style=\"color:#4a8a4a\">/hidden/terminal</span> ████<br><span style=\"font-size:11px;color:#3a6a3a\">终末站在等你</span>';
+          document.body.appendChild(s);
+          setTimeout(function(){s.style.opacity='1';},200);
+          setTimeout(function(){s.style.opacity='0';setTimeout(function(){s.remove();},500);},4000);
+        },400);
+      },2000+Math.random()*3000);
     }
     // terminal 已读 → 意识碎片（随机短暂跳脸）
     if(clues.indexOf('terminal_read')>=0 && Math.random()<.2 && !/\/ending/.test(location.pathname)){
@@ -297,11 +301,15 @@
         if (!d.ok) return;
         $('#rv-summary').innerHTML = '<span style="font-size:36px;font-weight:800;color:#f59e0b">' + d.rate + '</span> <span class="label" style="margin-left:10px">' + d.name + ' · ' + d.total + ' 条匿名评价</span>';
         $('#rv-list').innerHTML = d.items.map(reviewHtml).join('');
+        var isMochuan = rslug === 'mochuan-bio';
+        var showPages = isMochuan ? Math.min(d.pages, 4) : d.pages;
+        var hasHiddenNext = isMochuan && p >= 4 && d.pages > 4;
         var hp = '<button ' + (p <= 1 ? 'disabled' : '') + ' data-p="' + (p - 1) + '">上一页</button>';
-        for (var i = 1; i <= d.pages; i++) hp += '<button class="' + (i === p ? 'active' : '') + '" data-p="' + i + '">' + i + '</button>';
-        hp += '<button ' + (p >= d.pages ? 'disabled' : '') + ' data-p="' + (p + 1) + '">下一页</button>';
+        for (var i = 1; i <= showPages; i++) hp += '<button class="' + (i === p ? 'active' : '') + '" data-p="' + i + '">' + i + '</button>';
+        hp += '<button ' + ((p >= d.pages && !hasHiddenNext) ? 'disabled' : '') + ' data-p="' + (p + 1) + '">下一页</button>';
         $('#rv-pager').innerHTML = hp;
-        if (rslug === 'mochuan-bio' && p >= 4) { glitch.flash(); setTimeout(function(){glitch.crawl('别投 我会回来的 下一个 别投 别投 别投',6000);},300); setTimeout(function(){glitch.scanlines(4000);},800); flag('reviews_deep'); }
+        if (isMochuan && p >= 4) { glitch.flash(); setTimeout(function(){glitch.crawl('别投 我会回来的 下一个 别投 别投 别投',6000);},300); setTimeout(function(){glitch.scanlines(4000);},800); flag('reviews_deep'); }
+        if (isMochuan && p >= 5) { flag('reviews_deep'); }
         $$('#rv-pager button').forEach(function (b) { if (!b.disabled) b.addEventListener('click', function () { load(parseInt(b.dataset.p, 10)); window.scrollTo(0, 0); }); });
       });
     }

@@ -88,6 +88,10 @@ function serveStatic(res, root, pathname) {
   if (!full.startsWith(root)) { res.statusCode = 403; return res.end('403'); }
   fs.readFile(full, (err, data) => {
     if (err) {
+      // 无后缀路径 → 尝试补 .html
+      if (!path.extname(pathname) && !pathname.endsWith('/')) {
+        return serveStatic(res, root, pathname + '.html');
+      }
       if (root === PUBLIC && !pathname.startsWith('/api/')) {
         return fs.readFile(path.join(root, '404.html'), (e2, d2) => {
           if (e2) { res.statusCode = 404; res.setHeader('Content-Type', 'text/plain; charset=utf-8'); return res.end('404'); }
@@ -538,6 +542,10 @@ if (IS_RENDER || MAIN_ONLY) {
     if (!full.startsWith(root)) { res.statusCode = 403; return res.end('403'); }
     fs.readFile(full, (err, data) => {
       if (err) {
+        // 无后缀路径 → 尝试补 .html
+        if (!path.extname(pathname) && !pathname.endsWith('/')) {
+          return serveStaticProd(res, root, pathname + '.html', prefix);
+        }
         if (root === PUBLIC && !pathname.startsWith('/api/')) {
           return fs.readFile(path.join(root, '404.html'), (e2, d2) => {
             if (e2) { res.statusCode = 404; res.setHeader('Content-Type', 'text/plain; charset=utf-8'); return res.end('404'); }
