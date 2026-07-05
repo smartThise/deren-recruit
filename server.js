@@ -439,8 +439,8 @@ function endingOf(s) {
   const have = CLUES.filter(k => s.flags.has(k));
   const n = have.length;
   if (s.appliedMochuan && s.healthAgreed) return { id: 'consumed', cls: 'bad', title: '你被录用了', found: n, total: CLUES.length };
-  // truth: 必须走完 genesis→terminal→db→exec 全链条 + 举报成功
-  const KEYS = ['genesis_read', 'terminal_unlocked', 'db_access', 'exec_access'];
+  // truth: 必须走完 archive→genesis→terminal→db→exec 全链条 + 举报成功
+  const KEYS = ['archive', 'genesis_read', 'terminal_unlocked', 'db_access', 'exec_access'];
   if (KEYS.every(k => s.flags.has(k)) && s.flags.has('report_mochuan') && !s.appliedMochuan)
     return { id: 'truth', cls: 'best', title: '你查清了，并把它交了出去', found: n, total: CLUES.length };
   // 举报了但链条不全 → reported（包含决战失败）
