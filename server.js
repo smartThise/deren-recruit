@@ -219,6 +219,13 @@ function mutateState(s) {
     if (m.id === 'm5' && r.name) body = '内网通讯录里 ' + r.name + ' 的头像，我们替你准备好了。是 ' + r.name + ' 睡着的样子。不用担心，' + r.name + ' 以后会一直在这里。明天见。';
     s.messages.push({ id: m.id, t: Date.now(), from: m.from, subject: m.subject, body: body, unread: true });
   });
+  // 隐藏页面发现后的匿名消息
+  if (s.flags.has('genesis_read') && !s.messages.find(x => x.id === 'anon-genesis')) {
+    s.messages.push({ id: 'anon-genesis', t: Date.now(), from: '████', subject: '你读了它', body: '你不该读那个。那东西不是给你看的。现在它知道有人读过了。\n\n你往下翻的时候，有没有觉得屏幕后面有什么在看着你。那不是错觉。你快碰到了。别停。也别回头。', unread: true });
+  }
+  if (s.flags.has('terminal_read') && !s.messages.find(x => x.id === 'anon-signal')) {
+    s.messages.push({ id: 'anon-signal', t: Date.now(), from: '████', subject: '信号泄露', body: '终端日志不是被人发现的。是它让你发现的。\n\n那些信号还在跑。MC-0019 的数据是上好的——你知道"上好"是什么意思吗。每一个被完成的人，都还在。你点开那个终端的那一刻，它看到了你的波形。\n\n它在学你。', unread: true });
+  }
 }
 
 async function apiMain(s, req, res, u) {

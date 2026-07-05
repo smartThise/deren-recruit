@@ -98,6 +98,29 @@
     if (a.endingType === 'good' && !/\/ending/.test(location.pathname)) document.documentElement.classList.add('aura-good');
   });
 
+  // 隐藏页面事件链
+  fetch('/api/state').then(function(st){
+    if(!st||!st.progress)return;
+    var clues=st.progress.clues||[];
+    // genesis 已读但 terminal 未读 → 随机信号干扰泄露 terminal 链接
+    if(clues.indexOf('genesis_read')>=0 && clues.indexOf('terminal_read')<0 && Math.random()<.25){
+      setTimeout(function(){
+        var s=document.createElement('div');
+        s.style.cssText='position:fixed;top:30%;left:50%;transform:translate(-50%,-50%);z-index:10001;pointer-events:none;font-family:monospace;font-size:14px;color:#1a5a1a;background:rgba(0,0,0,.92);padding:12px 20px;border:1px solid #1a3a1a;border-radius:4px;text-shadow:0 0 8px #1a6a1a;opacity:0;transition:opacity .3s';
+        s.textContent='SIGNAL_LEAK ████ B4-NODE-7 ██ /hidden/terminal ██ ██████';
+        document.body.appendChild(s);
+        setTimeout(function(){s.style.opacity='1';},100);
+        setTimeout(function(){s.style.opacity='0';setTimeout(function(){s.remove();},400);},2000+Math.random()*2000);
+      },3000+Math.random()*8000);
+    }
+    // terminal 已读 → 意识碎片（随机短暂跳脸）
+    if(clues.indexOf('terminal_read')>=0 && Math.random()<.2 && !/\/ending/.test(location.pathname)){
+      setTimeout(function(){
+        glitch.face('我 看 见 你 了',true);
+      },5000+Math.random()*15000);
+    }
+  });
+
   // 结局自然触发：达成时不再显示"查看结局"链接，而是自动转场崩坏 → 跳结局页（每个会话一次）
   fetch('/api/state').then(function (st) {
     if (st && st.ending && !sessionStorage.getItem('drEndingShown')) {
