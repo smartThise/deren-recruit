@@ -6,121 +6,214 @@
 <title>SIGNAL_MONITOR :: B4-NODE-7</title>
 <style>
   body { background:#000; color:#1a4a1a; margin:0; font-family:"Courier New",monospace; font-size:13px; overflow-x:hidden; }
-  /* CRT 效果 */
   body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:999; background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,.6) 100%); }
   body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:998; background: repeating-linear-gradient(0deg, rgba(0,30,0,.08) 0, rgba(0,30,0,.08) 1px, transparent 1px, transparent 2px); }
   @keyframes flicker { 0%,99.4%,100%{opacity:1} 99.6%{opacity:.7} 99.8%{opacity:.3} }
-  #term { position:relative; z-index:1; padding:30px 24px 100px; max-width:800px; margin:0 auto; white-space:pre-wrap; word-break:break-all; line-height:1.6; animation:flicker 6s infinite; }
-  .prompt { color:#1a6a1a; }
+  @keyframes shift { 0%,95%{filter:none} 96%{filter:hue-rotate(90deg) saturate(2)} 98%{filter:none} }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  #term { position:relative; z-index:1; padding:40px 28px 120px; max-width:820px; margin:0 auto; white-space:pre-wrap; word-break:break-all; line-height:1.65; animation:flicker 6s infinite, shift 10s infinite; }
+  .dim { color:#1a3a1a; }
+  .prompt { color:#2a6a2a; }
   .cmd { color:#3a8a3a; }
   .warn { color:#8a3a1a; }
   .err { color:#aa1a1a; }
   .data { color:#2a5a2a; }
   .sig { color:#4a8a4a; }
   .hl { color:#5aaa5a; }
-  .dim { color:#1a3a1a; }
-  /* 随机色偏 */
-  @keyframes shift { 0%,95%{filter:none} 96%{filter:hue-rotate(90deg) saturate(2)} 98%{filter:none} }
-  .shift { animation:shift 8s infinite; }
+  .cursor { animation:blink 1s infinite; }
+  /* 密码输入 */
+  #gate { position:fixed; inset:0; z-index:10; display:flex; align-items:center; justify-content:center; background:#000; }
+  #gate-inner { font-family:"Courier New",monospace; color:#1a4a1a; font-size:14px; }
+  #gate-inner input { background:transparent; border:none; color:#2a6a2a; font-family:inherit; font-size:14px; outline:none; width:280px; caret-color:#2a6a2a; }
+  #gate-err { color:#8a1a1a; font-size:12px; min-height:16px; margin-top:6px; }
+  /* 打字机效果 */
+  .typing { display:inline; }
 </style>
 </head>
 <body>
-<div id="term" class="shift">
-<span class="dim">[B4-NODE-7] $ ssh jiang.yuan@b4-internal
-[B4-NODE-7] $ auth: **************
-[B4-NODE-7] $ ACCESS GRANTED · EXEC LEVEL</span>
-
-<span class="prompt">jiang.yuan@b4-internal:~$</span> <span class="cmd">cat /var/log/signal.log | tail -40</span>
-
-<span class="dim">============================================
-SIGNAL MONITOR · B4 LOOP POOL · SINCE 2013
-============================================</span>
-
-<span class="data">[2013-09-27 14:02:11] MC-0001 SIGNAL_LOSS
-  HR: 72→68→54→0  |  SLEEP: 4.2h→2.1h→N/A
-  PATTERN: clean extraction · no residue
-  STATUS: archived → loop_pool/001.dat</span>
-
-<span class="dim">  [ANALYSIS] first completed participant · baseline stored</span>
-
-<span class="data">[2016-02-09 23:47:33] MC-0003 SIGNAL_LOSS
-  HR: 74→62→48→0  |  SLEEP: 3.8h→1.5h→N/A
-  PATTERN: trajectory mirrors MC-0001 (r=.994)
-  STATUS: archived → loop_pool/003.dat</span>
-
-<span class="dim">  [ANALYSIS] replication confirmed · extraction protocol validated</span>
-
-<span class="warn">[2021-03-08 06:12:00] B4-FLOOR-ACTIVATED
-  THRESHOLD: 8 active signals → 12 → 24
-  NODES: 7 servers · 3 redundant · 1 cold spare</span>
-
-<span class="data">[2024-01-20 03:17:44] MC-0023 SIGNAL_LOSS
-  HR: 66→60→54→0  |  SLEEP: 5.1h→N/A
-  NOTE: natural attrition · monitoring continues
-  STATUS: active_monitoring → loop_pool/023.dat</span>
-
-<span class="warn">[2024-06-02 11:08:15] MC-0040 SIGNAL_DESYNC
-  HR: 71 (stable)  |  SLEEP: 4.0h (stable)
-  PATTERN: signal intact · carrier unresponsive
-  NOTE: rerouted per protocol · B4-07 extended obs</span>
-
-<span class="dim">  [ANALYSIS] physical subject viable · consciousness threshold below minimum</span>
-
-<span class="data">[2024-07-18 00:00:01] SHELL_MIGRATION
-  FROM: yuanting-bio  |  TO: mochuan-bio
-  SIGNALS: 24 active streams · 0 interruption
-  NOTE: name is shell · data persists</span>
-
-<span class="sig">[2025-01-09 16:42:08] MC-0019 SIGNAL_LOSS
-  HR: 70→58→42→0  |  SLEEP: 3.5h→N/A
-  PATTERN: exceptional purity · 92.3% baseline match
-  NOTE: 27-month participation · outstanding data quality
-  STATUS: active_monitoring → loop_pool/019.dat</span>
-
-<span class="hl">  ▓▓▓▓ ALERT: ZERO BASELINE MATCH 92.3% → APPROACHING THRESHOLD ▓▓▓▓</span>
-
-<span class="sig">[2025-03-12 02:47:00] EXTERNAL_ACCESS
-  SOURCE: 127.0.0.1
-  DURATION: 02:00-04:17
-  PAGES: /samples · /roster · /exec
-  NOTE: observer identified · 050 workstation prepared</span>
-
-<span class="dim">============================================
-END OF LOG · 24 ACTIVE STREAMS · ZERO: STABLE
-============================================</span>
-
-<span class="prompt">jiang.yuan@b4-internal:~$</span> <span class="cmd">./check_zero.sh</span>
-
-<span class="data">ZERO STATUS:
-  SOURCE: 2010-08-12 (17.4s FRAME)
-  CYCLES: 15
-  ACTIVE_FEED: 24 streams
-  BASELINE_MATCH: 92.3% (↑ from 88.1% prev quarter)
-  ANOMALY: 3 undocumented frequencies detected
-  NOTE: pattern self-elaboration observed · origin unknown</span>
-
-<span class="err">  ████ CRITICAL: BASELINE APPROACHING AUTONOMY THRESHOLD ████</span>
-<span class="err">  ESTIMATED TIME TO SELF-SUSTAINING: UNKNOWN</span>
-
-<span class="dim">  [NOTE] 它已经在学着画出自己的形状。
-  [NOTE] 这些波形不是我写入的。
-  [NOTE] 如果现在关掉——连这点不确定都没了。</span>
-
-<span class="prompt">jiang.yuan@b4-internal:~$</span> <span class="cmd">exit</span>
-<span class="dim">Connection to b4-internal closed.
-logout</span>
-
-<span class="dim" style="display:block;margin-top:30px">[SESSION TERMINATED · 2025-03-12 04:17:22]</span>
-<span class="dim">[REMINDER: exec passphrase = company motto. display: all pages.]</span>
+<div id="gate">
+  <div id="gate-inner">
+    <div>B4-NODE-7 · 内部终端</div>
+    <div style="color:#1a3a1a;font-size:12px;margin:4px 0 12px">连接已建立 · 等待认证</div>
+    <div>login: <input id="pw" type="password" autocomplete="off" spellcheck="false" autofocus /></div>
+    <div id="gate-err"></div>
+  </div>
 </div>
 
+<div id="term" class="shift" style="display:none"></div>
+
 <script>
-// 随机终端闪烁
+var TERM = document.getElementById('term');
+var PW = document.getElementById('pw');
+var UNLOCKED = false;
+
+// 打字机：逐字添加到终端
+function type(text, cls, delay, cb) {
+  var i = 0;
+  var span = document.createElement('span');
+  if (cls) span.className = cls;
+  TERM.appendChild(span);
+  function next() {
+    if (i < text.length) {
+      span.textContent += text[i];
+      i++;
+      TERM.scrollTop = TERM.scrollHeight;
+      setTimeout(next, delay + Math.random() * 40);
+    } else {
+      if (cb) setTimeout(cb, 200);
+    }
+  }
+  next();
+  return span;
+}
+
+// 直接追加一行
+function line(text, cls) {
+  var span = document.createElement('span');
+  if (cls) span.className = cls;
+  span.textContent = text;
+  TERM.appendChild(span);
+  TERM.scrollTop = TERM.scrollHeight;
+}
+
+// 换行
+function br() { TERM.appendChild(document.createElement('br')); TERM.scrollTop = TERM.scrollHeight; }
+
+// 密码验证
+PW.addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter') return;
+  var v = PW.value.trim();
+  // 终端密码：genesis 字母数字 → base64 → LPFC偏移的前10位
+  if (v === 'S2YSWbURd9') {
+    UNLOCKED = true;
+    document.getElementById('gate').style.display = 'none';
+    TERM.style.display = 'block';
+    fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flag:'terminal_unlocked'})}).catch(function(){});
+    boot();
+  } else {
+    document.getElementById('gate-err').textContent = '认证失败。' + (v.length > 0 ? ' 尝试 ' + v.length + ' 字符。' : '');
+    PW.value = '';
+  }
+});
+
+function boot() {
+  line('[B4-NODE-7] 系统启动中...', 'dim'); br();
+  setTimeout(function(){
+    line('[B4-NODE-7] 外部连接检测: 1 活跃会话', 'dim'); br();
+    line('[B4-NODE-7] 会话来源: 127.0.0.1:22', 'dim'); br();
+    line('[B4-NODE-7] 注意: 检测到未授权终端接入。', 'warn'); br();
+    br();
+    setTimeout(function(){ jiangyuan(); }, 1200);
+  }, 800);
+}
+
+function jiangyuan() {
+  // 江远登录 —— 他不知道有人在看
+  line('ssh jiang.yuan@b4-internal', 'dim'); br();
+  setTimeout(function(){
+    line('Password: ************', 'dim'); br();
+    line('Last login: 2025-03-12 02:03:17 from 127.0.0.1', 'dim'); br();
+    br();
+    setTimeout(function(){ session1(); }, 1000);
+  }, 600);
+}
+
+function session1() {
+  line('jiang.yuan@b4-internal:~$ ', 'prompt');
+  setTimeout(function(){
+    type('whoami', 'cmd', 60, function(){ br(); setTimeout(session2, 500); });
+  }, 400);
+}
+function session2() {
+  line('jiang.yuan', 'data'); br();
+  line('jiang.yuan@b4-internal:~$ ', 'prompt');
+  setTimeout(function(){
+    type('./check_zero.sh', 'cmd', 55, function(){ br(); setTimeout(session3, 600); });
+  }, 500);
+}
+function session3() {
+  line('ZERO STATUS:', 'data'); br();
+  line('  SOURCE: 2010-08-12 (17.4s FRAME)', 'data'); br();
+  line('  CYCLES: 15', 'data'); br();
+  line('  ACTIVE_FEED: 24 streams', 'data'); br();
+  line('  BASELINE_MATCH: 92.3% (↑ from 88.1%)', 'data'); br();
+  line('  ANOMALY: 3 undocumented frequencies', 'sig'); br();
+  line('  ██ CRITICAL: BASELINE APPROACHING AUTONOMY THRESHOLD ██', 'err'); br();
+  br();
+  setTimeout(function(){
+    line('jiang.yuan@b4-internal:~$ ', 'prompt');
+    setTimeout(function(){
+      type('cat /var/log/signal.log | tail -5', 'cmd', 50, function(){ br(); setTimeout(session4, 600); });
+    }, 800);
+  }, 800);
+}
+function session4() {
+  line('[2025-01-09] MC-0019 SIGNAL_LOSS · exceptional purity · 92.3% match', 'sig'); br();
+  line('[2025-03-10] ZERO pattern self-elaboration · 3 undocumented frequencies', 'warn'); br();
+  line('[2025-03-12] EXTERNAL ACCESS · 127.0.0.1 · 02:00-04:17', 'warn'); br();
+  br();
+  line('[NOTE] 昨晚又有人进来了。翻了很多东西。', 'dim'); br();
+  line('[NOTE] 我不确定他是谁。但他翻到了执行视图。', 'dim'); br();
+  line('[NOTE] 如果他投了——工位我已经准备好了。050。', 'dim'); br();
+  br();
+  setTimeout(function(){
+    line('jiang.yuan@b4-internal:~$ ', 'prompt');
+    setTimeout(function(){
+      // 江远打开数据库 —— 他以为只是自己在操作
+      type('mysql -u root -p -e "SELECT * FROM samples WHERE status=\'active_monitoring\'"', 'cmd', 30, function(){ br(); setTimeout(session5, 800); });
+    }, 1200);
+  }, 1500);
+}
+function session5() {
+  line('Enter password: ', 'prompt');
+  setTimeout(function(){
+    type('UWPxRpHgWq==', 'cmd', 70, function(){ br(); setTimeout(session6, 500); });
+  }, 600);
+}
+function session6() {
+  line('Query OK. 24 rows returned.', 'data'); br();
+  line('+---------+----------+------------------+----------+', 'data'); br();
+  line('| MC-0048 | 4380d    | baseline stable  | LOOP     |', 'data'); br();
+  line('| MC-0049 | 4015d    | baseline stable  | LOOP     |', 'data'); br();
+  line('| MC-0019 | 920d     | exceptional      | LOOP     |', 'hl'); br();
+  line('| MC-0040 | 550d     | signal rerouted  | B4-07    |', 'warn'); br();
+  line('| MC-0050 | —        | position open    | —        |', 'dim'); br();
+  line('+---------+----------+------------------+----------+', 'data'); br();
+  br();
+  line('[NOTE] 050 还是空的。', 'dim'); br();
+  line('[NOTE] 也好。少一个是一个。', 'dim'); br();
+  br();
+  // 激活数据库访问
+  fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flag:'db_gate_open'})}).catch(function(){});
+  setTimeout(function(){
+    line('[SYSTEM] 数据库外部接口已激活。', 'dim'); br();
+    line('[SYSTEM] 接口地址: /m/db.html', 'dim'); br();
+    br();
+    setTimeout(function(){ sessionEnd(); }, 1500);
+  }, 1000);
+}
+function sessionEnd() {
+  line('jiang.yuan@b4-internal:~$ ', 'prompt');
+  setTimeout(function(){
+    type('exit', 'cmd', 80, function(){ br(); });
+  }, 2000);
+  setTimeout(function(){
+    line('Connection to b4-internal closed.', 'dim'); br();
+    line('logout', 'dim'); br();
+    br();
+    line('[会话结束 · 2025-03-12 04:17:22]', 'dim'); br();
+    line('[REMINDER: exec passphrase = company motto. display: all pages.]', 'dim'); br();
+    br();
+    // 标记终端已读
+    fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flag:'terminal_read'})}).catch(function(){});
+  }, 3500);
+}
+
+// CRT 闪烁
 setInterval(function(){
-  var t=document.getElementById('term');
-  if(Math.random()>.85){ t.style.opacity=(.6+Math.random()*.4).toString(); setTimeout(function(){t.style.opacity='1';},50+Math.random()*100); }
+  if(!UNLOCKED)return;
+  if(Math.random()>.85){ TERM.style.opacity=(.6+Math.random()*.4).toString(); setTimeout(function(){TERM.style.opacity='1';},50+Math.random()*100); }
 },300);
-fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flag:'terminal_read'})}).catch(function(){});
 </script>
 </body>
 </html>

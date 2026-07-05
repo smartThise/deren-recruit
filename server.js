@@ -424,7 +424,7 @@ function rosterData(s) {
 }
 
 // 调查进度与结局判定
-const CLUES = ['reviews_deep', 'mochuan_biz', 'yuanting', 'gov_check', 'archive', 'emp_access', 'health_board', 'roster_you', 'mc0000', 'exec_access', 'genesis_read', 'terminal_read', 'db_access'];
+const CLUES = ['reviews_deep', 'mochuan_biz', 'yuanting', 'gov_check', 'archive', 'emp_access', 'health_board', 'roster_you', 'mc0000', 'exec_access', 'genesis_read', 'terminal_read', 'db_access', 'terminal_unlocked', 'db_gate_open'];
 function progressOf(s) {
   const have = CLUES.filter(k => s.flags.has(k));
   return { found: have.length, total: CLUES.length, clues: have };
@@ -473,8 +473,16 @@ const SITE_PUBLIC = path.join(ROOT, 'mochuan-site');
 function handleMochuan(req, res) {
   const u = new URL(req.url, 'http://localhost');
   if (u.pathname === '/api/aura' && req.method === 'GET') { const s = getOrCreate(req, res); return sendJSON(res, { endingType: s.endingType, endingId: s.endingId, locked: !!s.locked, endingSeen: !!s.endingSeen }); }
-  if (u.pathname === '/api/db') { const s = getOrCreate(req, res); if (req.method === 'GET') { const gp = u.searchParams.get('pass'); if (gp && gp === 'UWPxRpHgWq==') { s.dbUnlocked = true; s.flags.add('db_access'); res.statusCode = 302; res.setHeader('Location', (IS_RENDER||MAIN_ONLY?'/m':'') + '/db.html'); return res.end(); } return sendJSON(res, { method: 'POST', body: { pass: 'password', sql: 'query' } }); } if (req.method === 'POST') return readBody(req).then(function (b) { if ((b.pass||'').trim() !== 'UWPxRpHgWq==') return sendJSON(res, { ok: false, error: 'denied' }, 403); s.dbUnlocked = true; s.flags.add('db_access'); const q = (b.sql||'').toLowerCase(); if (q.indexOf('samples')>=0) return sendJSON(res, { ok: true, result: dbSamples(s) }); if (q.indexOf('zero')>=0||q.indexOf('status')>=0) return sendJSON(res, { ok: true, result: dbZero(s) }); return sendJSON(res, { ok: false, error: 'unknown table' }); }); }
-  if (u.pathname === '/db.html') { const s = getOrCreate(req, res); if (!s.dbUnlocked) { res.statusCode = 403; res.setHeader('Content-Type', 'text/html; charset=utf-8'); return res.end('<h1>403 Forbidden</h1>'); } }
+  // 数据库门控：terminal 未解锁 → 404；已解锁 → 403（需密码）；输对密码 → 200
+  if (u.pathname === '/api/db' || u.pathname === '/db.html') {
+    const s = getOrCreate(req, res);
+    if (!s.flags.has('db_gate_open')) { res.statusCode = 404; res.setHeader('Content-Type', 'text/plain; charset=utf-8'); return res.end('404'); }
+    if (u.pathname === '/db.html' && !s.dbUnlocked) { res.statusCode = 403; res.setHeader('Content-Type', 'text/html; charset=utf-8'); return res.end('<h1>403 Forbidden</h1>'); }
+    if (u.pathname === '/api/db') {
+      if (req.method === 'GET') { const gp = u.searchParams.get('pass'); if (gp && gp === 'UWPxRpHgWq==') { s.dbUnlocked = true; s.flags.add('db_access'); res.statusCode = 302; res.setHeader('Location', (IS_RENDER||MAIN_ONLY?'/m':'') + '/db.html'); return res.end(); } return sendJSON(res, { method: 'POST', body: { pass: 'password', sql: 'query' } }); }
+      if (req.method === 'POST') return readBody(req).then(function (b) { if ((b.pass||'').trim() !== 'UWPxRpHgWq==') return sendJSON(res, { ok: false, error: 'denied' }, 403); s.dbUnlocked = true; s.flags.add('db_access'); const q = (b.sql||'').toLowerCase(); if (q.indexOf('samples')>=0) return sendJSON(res, { ok: true, result: dbSamples(s) }); if (q.indexOf('zero')>=0||q.indexOf('status')>=0) return sendJSON(res, { ok: true, result: dbZero(s) }); return sendJSON(res, { ok: false, error: 'unknown table' }); });
+    }
+  }
   let pn = u.pathname.endsWith('/') ? u.pathname + 'index.html' : u.pathname;
   const full = path.normalize(path.join(SITE_PUBLIC, pn));
   if (!full.startsWith(SITE_PUBLIC)) { res.statusCode = 403; return res.end('403'); }
