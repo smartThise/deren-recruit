@@ -215,3 +215,45 @@ html.aura-bad::after { content: none; }
 /* === aura-good：好结局后，白茫茫一片大地真干净 === */
 html.aura-good body { background:#ffffff !important; }
 html.aura-good::after { content:'一切都干净了。'; position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:#fff; color:#1f2329; font-family:"FangSong","STFangsong","仿宋",serif; font-size:22px; letter-spacing:.3em; z-index:9998; pointer-events:none; }
+
+/* ========== 红温跳脸特效系统 ========== */
+
+/* 全屏红闪 */
+@keyframes red-flash { 0%{opacity:0} 30%{opacity:.92} 60%{opacity:.78} 100%{opacity:0} }
+.red-flash-overlay { position:fixed; inset:0; z-index:9999; pointer-events:none; background:#b91c1c; animation:red-flash .7s ease-out forwards; }
+.red-flash-overlay::after { content:''; position:absolute; inset:0; background: radial-gradient(circle at 50% 40%, #ff0000 0%, transparent 70%); mix-blend-mode:screen; }
+
+/* 屏幕剧烈抖动 + 反色 */
+@keyframes violent-shake { 0%,100%{transform:translate(0,0)} 10%{transform:translate(-12px,8px)} 20%{transform:translate(14px,-9px)} 30%{transform:translate(-8px,-11px)} 40%{transform:translate(10px,6px)} 50%{transform:translate(-15px,-4px)} 60%{transform:translate(7px,12px)} 70%{transform:translate(-11px,-7px)} 80%{transform:translate(13px,3px)} 90%{transform:translate(-6px,10px)} }
+.violent-shake { animation: violent-shake .12s infinite; }
+@keyframes invert-pulse { 0%,100%{filter:none} 50%{filter:invert(1) hue-rotate(180deg) saturate(3)} }
+.invert-pulse { animation: invert-pulse .5s infinite; }
+
+/* 文字腐败 - 逐字扭曲 */
+@keyframes txt-rot { 0%{transform:translate(0,0) skew(0)} 20%{transform:translate(3px,-1px) skew(2deg)} 50%{transform:translate(-2px,1px) skew(-1deg)} 80%{transform:translate(1px,-2px) skew(1deg)} 100%{transform:translate(0,1px) skew(0)} }
+.text-rot { animation: txt-rot .06s infinite; }
+.text-rot span { display:inline-block; animation: txt-rot .04s infinite; }
+.text-rot span:nth-child(odd) { color:#b91c1c; animation-delay:.02s; }
+.text-rot span:nth-child(even) { color:#000; animation-delay:.01s; }
+
+/* 跳脸 - 红色大字闪现 */
+@keyframes face-pop { 0%{opacity:0;transform:scale(.3)} 15%{opacity:1;transform:scale(1.4)} 25%{opacity:.95;transform:scale(.95)} 35%{opacity:1;transform:scale(1.15)} 60%{opacity:.7;transform:scale(1)} 100%{opacity:0;transform:scale(1.8)} }
+.jumpscare-face { position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center; pointer-events:none; font-family:"FangSong","STFangsong","仿宋",serif; font-size:clamp(40px,10vw,120px); color:#b91c1c; font-weight:900; text-shadow:0 0 60px #ff0000,0 0 120px #7a0000,0 0 200px #ff0000; letter-spacing:.2em; animation:face-pop 1.8s ease-out forwards; background: radial-gradient(circle, rgba(180,0,0,.3) 0%, rgba(0,0,0,.9) 70%); }
+.jumpscare-face.small { font-size:clamp(20px,5vw,50px); animation-duration:1.2s; }
+
+/* 扫描线 - 逐渐增强的压迫感 */
+@keyframes scanlines { 0%{opacity:.04} 50%{opacity:.12} 100%{opacity:.04} }
+.scanline-overlay { position:fixed; inset:0; z-index:9997; pointer-events:none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.6) 0, rgba(0,0,0,.6) 1px, transparent 1px, transparent 3px); animation: scanlines .15s infinite; mix-blend-mode: multiply; }
+
+/* 低频脉冲 - 边缘暗角呼吸 */
+@keyframes vignette-breathe { 0%,100%{box-shadow:inset 0 0 80px rgba(0,0,0,.3)} 50%{box-shadow:inset 0 0 160px rgba(0,0,0,.7)} }
+.vignette-breathe { position:fixed; inset:0; z-index:9996; pointer-events:none; animation: vignette-breathe 2s ease-in-out infinite; }
+
+/* 眼 - 屏幕中央短暂出现的符号 */
+@keyframes eye-blink { 0%,90%{opacity:0} 92%{opacity:.5} 96%{opacity:.15} 100%{opacity:0} }
+.eye-symbol { position:fixed; top:50%;left:50%;transform:translate(-50%,-50%); z-index:9998; pointer-events:none; font-size:80px; color:#b91c1c; opacity:0; text-shadow:0 0 40px #ff0000; animation: eye-blink 4s infinite; }
+.eye-symbol::before { content:'⌖'; }
+
+/* 旁白字幕条 - 底部红色跑马灯 */
+@keyframes crawl { 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
+.crawl-bar { position:fixed; bottom:40px; left:0; z-index:9999; pointer-events:none; white-space:nowrap; font-family:monospace; font-size:13px; color:#b91c1c; letter-spacing:.3em; animation:crawl 12s linear infinite; text-shadow:0 0 20px #ff0000; opacity:.7; }

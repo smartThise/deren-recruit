@@ -417,7 +417,7 @@ function rosterData(s) {
 }
 
 // 调查进度与结局判定
-const CLUES = ['reviews_deep', 'mochuan_biz', 'yuanting', 'gov_check', 'archive', 'emp_access', 'health_board', 'roster_you', 'mc0000', 'exec_access'];
+const CLUES = ['reviews_deep', 'mochuan_biz', 'yuanting', 'gov_check', 'archive', 'emp_access', 'health_board', 'roster_you', 'mc0000', 'exec_access', 'genesis_read', 'terminal_read', 'db_access'];
 function progressOf(s) {
   const have = CLUES.filter(k => s.flags.has(k));
   return { found: have.length, total: CLUES.length, clues: have };
@@ -466,7 +466,7 @@ const SITE_PUBLIC = path.join(ROOT, 'mochuan-site');
 function handleMochuan(req, res) {
   const u = new URL(req.url, 'http://localhost');
   if (u.pathname === '/api/aura' && req.method === 'GET') { const s = getOrCreate(req, res); return sendJSON(res, { endingType: s.endingType, endingId: s.endingId, locked: !!s.locked, endingSeen: !!s.endingSeen }); }
-  if (u.pathname === '/api/db') { const s = getOrCreate(req, res); if (req.method === 'GET') { const gp = u.searchParams.get('pass'); if (gp && gp === 'UWPxRpHgWq==') { s.dbUnlocked = true; res.statusCode = 302; res.setHeader('Location', (IS_RENDER||MAIN_ONLY?'/m':'') + '/db.html'); return res.end(); } return sendJSON(res, { method: 'POST', body: { pass: 'password', sql: 'query' } }); } if (req.method === 'POST') return readBody(req).then(function (b) { if ((b.pass||'').trim() !== 'UWPxRpHgWq==') return sendJSON(res, { ok: false, error: 'denied' }, 403); s.dbUnlocked = true; const q = (b.sql||'').toLowerCase(); if (q.indexOf('samples')>=0) return sendJSON(res, { ok: true, result: dbSamples(s) }); if (q.indexOf('zero')>=0||q.indexOf('status')>=0) return sendJSON(res, { ok: true, result: dbZero(s) }); return sendJSON(res, { ok: false, error: 'unknown table' }); }); }
+  if (u.pathname === '/api/db') { const s = getOrCreate(req, res); if (req.method === 'GET') { const gp = u.searchParams.get('pass'); if (gp && gp === 'UWPxRpHgWq==') { s.dbUnlocked = true; s.flags.add('db_access'); res.statusCode = 302; res.setHeader('Location', (IS_RENDER||MAIN_ONLY?'/m':'') + '/db.html'); return res.end(); } return sendJSON(res, { method: 'POST', body: { pass: 'password', sql: 'query' } }); } if (req.method === 'POST') return readBody(req).then(function (b) { if ((b.pass||'').trim() !== 'UWPxRpHgWq==') return sendJSON(res, { ok: false, error: 'denied' }, 403); s.dbUnlocked = true; s.flags.add('db_access'); const q = (b.sql||'').toLowerCase(); if (q.indexOf('samples')>=0) return sendJSON(res, { ok: true, result: dbSamples(s) }); if (q.indexOf('zero')>=0||q.indexOf('status')>=0) return sendJSON(res, { ok: true, result: dbZero(s) }); return sendJSON(res, { ok: false, error: 'unknown table' }); }); }
   if (u.pathname === '/db.html') { const s = getOrCreate(req, res); if (!s.dbUnlocked) { res.statusCode = 403; res.setHeader('Content-Type', 'text/html; charset=utf-8'); return res.end('<h1>403 Forbidden</h1>'); } }
   let pn = u.pathname.endsWith('/') ? u.pathname + 'index.html' : u.pathname;
   const full = path.normalize(path.join(SITE_PUBLIC, pn));
@@ -517,7 +517,7 @@ if (IS_RENDER || MAIN_ONLY) {
   const P_SITE = '/m';
   const P_GOV = '/g';
 
-  function serveStaticProd(res, root, pathname, prefix) { console.log("serveStaticProd", pathname, "root", root);
+  function serveStaticProd(res, root, pathname, prefix) {
     if (pathname.endsWith('/')) pathname = pathname + 'index.html';
     const full = path.normalize(path.join(root, pathname));
     if (!full.startsWith(root)) { res.statusCode = 403; return res.end('403'); }

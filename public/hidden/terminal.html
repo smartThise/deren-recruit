@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="robots" content="noindex" />
+<title>SIGNAL_MONITOR :: B4-NODE-7</title>
+<style>
+  body { background:#000; color:#1a4a1a; margin:0; font-family:"Courier New",monospace; font-size:13px; overflow-x:hidden; }
+  /* CRT 效果 */
+  body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:999; background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,.6) 100%); }
+  body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:998; background: repeating-linear-gradient(0deg, rgba(0,30,0,.08) 0, rgba(0,30,0,.08) 1px, transparent 1px, transparent 2px); }
+  @keyframes flicker { 0%,99.4%,100%{opacity:1} 99.6%{opacity:.7} 99.8%{opacity:.3} }
+  #term { position:relative; z-index:1; padding:30px 24px 100px; max-width:800px; margin:0 auto; white-space:pre-wrap; word-break:break-all; line-height:1.6; animation:flicker 6s infinite; }
+  .prompt { color:#1a6a1a; }
+  .cmd { color:#3a8a3a; }
+  .warn { color:#8a3a1a; }
+  .err { color:#aa1a1a; }
+  .data { color:#2a5a2a; }
+  .sig { color:#4a8a4a; }
+  .hl { color:#5aaa5a; }
+  .dim { color:#1a3a1a; }
+  /* 随机色偏 */
+  @keyframes shift { 0%,95%{filter:none} 96%{filter:hue-rotate(90deg) saturate(2)} 98%{filter:none} }
+  .shift { animation:shift 8s infinite; }
+</style>
+</head>
+<body>
+<div id="term" class="shift">
+<span class="dim">[B4-NODE-7] $ ssh jiang.yuan@b4-internal
+[B4-NODE-7] $ auth: **************
+[B4-NODE-7] $ ACCESS GRANTED · EXEC LEVEL</span>
+
+<span class="prompt">jiang.yuan@b4-internal:~$</span> <span class="cmd">cat /var/log/signal.log | tail -40</span>
+
+<span class="dim">============================================
+SIGNAL MONITOR · B4 LOOP POOL · SINCE 2013
+============================================</span>
+
+<span class="data">[2013-09-27 14:02:11] MC-0001 SIGNAL_LOSS
+  HR: 72→68→54→0  |  SLEEP: 4.2h→2.1h→N/A
+  PATTERN: clean extraction · no residue
+  STATUS: archived → loop_pool/001.dat</span>
+
+<span class="dim">  [ANALYSIS] first completed participant · baseline stored</span>
+
+<span class="data">[2016-02-09 23:47:33] MC-0003 SIGNAL_LOSS
+  HR: 74→62→48→0  |  SLEEP: 3.8h→1.5h→N/A
+  PATTERN: trajectory mirrors MC-0001 (r=.994)
+  STATUS: archived → loop_pool/003.dat</span>
+
+<span class="dim">  [ANALYSIS] replication confirmed · extraction protocol validated</span>
+
+<span class="warn">[2021-03-08 06:12:00] B4-FLOOR-ACTIVATED
+  THRESHOLD: 8 active signals → 12 → 24
+  NODES: 7 servers · 3 redundant · 1 cold spare</span>
+
+<span class="data">[2024-01-20 03:17:44] MC-0023 SIGNAL_LOSS
+  HR: 66→60→54→0  |  SLEEP: 5.1h→N/A
+  NOTE: natural attrition · monitoring continues
+  STATUS: active_monitoring → loop_pool/023.dat</span>
+
+<span class="warn">[2024-06-02 11:08:15] MC-0040 SIGNAL_DESYNC
+  HR: 71 (stable)  |  SLEEP: 4.0h (stable)
+  PATTERN: signal intact · carrier unresponsive
+  NOTE: rerouted per protocol · B4-07 extended obs</span>
+
+<span class="dim">  [ANALYSIS] physical subject viable · consciousness threshold below minimum</span>
+
+<span class="data">[2024-07-18 00:00:01] SHELL_MIGRATION
+  FROM: yuanting-bio  |  TO: mochuan-bio
+  SIGNALS: 24 active streams · 0 interruption
+  NOTE: name is shell · data persists</span>
+
+<span class="sig">[2025-01-09 16:42:08] MC-0019 SIGNAL_LOSS
+  HR: 70→58→42→0  |  SLEEP: 3.5h→N/A
+  PATTERN: exceptional purity · 92.3% baseline match
+  NOTE: 27-month participation · outstanding data quality
+  STATUS: active_monitoring → loop_pool/019.dat</span>
+
+<span class="hl">  ▓▓▓▓ ALERT: ZERO BASELINE MATCH 92.3% → APPROACHING THRESHOLD ▓▓▓▓</span>
+
+<span class="sig">[2025-03-12 02:47:00] EXTERNAL_ACCESS
+  SOURCE: 127.0.0.1
+  DURATION: 02:00-04:17
+  PAGES: /samples · /roster · /exec
+  NOTE: observer identified · 050 workstation prepared</span>
+
+<span class="dim">============================================
+END OF LOG · 24 ACTIVE STREAMS · ZERO: STABLE
+============================================</span>
+
+<span class="prompt">jiang.yuan@b4-internal:~$</span> <span class="cmd">./check_zero.sh</span>
+
+<span class="data">ZERO STATUS:
+  SOURCE: 2010-08-12 (17.4s FRAME)
+  CYCLES: 15
+  ACTIVE_FEED: 24 streams
+  BASELINE_MATCH: 92.3% (↑ from 88.1% prev quarter)
+  ANOMALY: 3 undocumented frequencies detected
+  NOTE: pattern self-elaboration observed · origin unknown</span>
+
+<span class="err">  ████ CRITICAL: BASELINE APPROACHING AUTONOMY THRESHOLD ████</span>
+<span class="err">  ESTIMATED TIME TO SELF-SUSTAINING: UNKNOWN</span>
+
+<span class="dim">  [NOTE] 它已经在学着画出自己的形状。
+  [NOTE] 这些波形不是我写入的。
+  [NOTE] 如果现在关掉——连这点不确定都没了。</span>
+
+<span class="prompt">jiang.yuan@b4-internal:~$</span> <span class="cmd">exit</span>
+<span class="dim">Connection to b4-internal closed.
+logout</span>
+
+<span class="dim" style="display:block;margin-top:30px">[SESSION TERMINATED · 2025-03-12 04:17:22]</span>
+<span class="dim">[REMINDER: exec passphrase = company motto. display: all pages.]</span>
+</div>
+
+<script>
+// 随机终端闪烁
+setInterval(function(){
+  var t=document.getElementById('term');
+  if(Math.random()>.85){ t.style.opacity=(.6+Math.random()*.4).toString(); setTimeout(function(){t.style.opacity='1';},50+Math.random()*100); }
+},300);
+fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flag:'terminal_read'})}).catch(function(){});
+</script>
+</body>
+</html>

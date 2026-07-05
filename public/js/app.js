@@ -10,6 +10,47 @@
   function dkFx(type, ms) { document.body.classList.add('dk-' + type); setTimeout(function () { document.body.classList.remove('dk-' + type); }, ms || 1200); }
   function flag(name) { fetch('/api/flag', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ flag: name }) }).catch(function () {}); }
 
+  // ======== 红温跳脸特效模块 ========
+  var glitch = (function(){
+    var WORDS = ['看着', '别回头', '它在', '醒着', '050', '零', '供能', '对账', '完成', 'B4', '手环', '别摘', '睡了', '循环', '氧合', '阈值', '他还在', '别出声', '████', '它知道', '下一个', '是你'];
+    function el(tag, cls, css) { var e=document.createElement(tag); if(cls)e.className=cls; if(css)Object.assign(e.style,css); return e; }
+    function audioDrone(freq, dur, type) {
+      try { var ctx=new(window.AudioContext||window.webkitAudioContext)(),now=ctx.currentTime; var o=ctx.createOscillator(),g=ctx.createGain(); o.type=type||'sawtooth'; o.frequency.setValueAtTime(freq,now); o.frequency.exponentialRampToValueAtTime(freq*.3,now+dur); g.gain.setValueAtTime(.0001,now); g.gain.exponentialRampToValueAtTime(.18,now+.03); g.gain.exponentialRampToValueAtTime(.0001,now+dur); o.connect(g).connect(ctx.destination); o.start(now); o.stop(now+dur+.1); }catch(e){}
+    }
+    function audioSting() {
+      try { var ctx=new(window.AudioContext||window.webkitAudioContext)(),now=ctx.currentTime;
+        var o1=ctx.createOscillator(),g1=ctx.createGain(); o1.type='square'; o1.frequency.setValueAtTime(2800,now); g1.gain.setValueAtTime(.0001,now); g1.gain.exponentialRampToValueAtTime(.35,now+.005); g1.gain.exponentialRampToValueAtTime(.0001,now+.15); o1.connect(g1).connect(ctx.destination); o1.start(now); o1.stop(now+.18);
+        var o2=ctx.createOscillator(),g2=ctx.createGain(); o2.type='sawtooth'; o2.frequency.setValueAtTime(110,now+.1); o2.frequency.exponentialRampToValueAtTime(30,now+.8); g2.gain.setValueAtTime(.0001,now+.1); g2.gain.exponentialRampToValueAtTime(.5,now+.12); g2.gain.exponentialRampToValueAtTime(.0001,now+.9); o2.connect(g2).connect(ctx.destination); o2.start(now+.1); o2.stop(now+1);
+      }catch(e){}
+    }
+    return {
+      /* 红闪 */
+      flash: function(){ var d=el('div','red-flash-overlay'); document.body.appendChild(d); audioDrone(160,.7,'square'); setTimeout(function(){d.remove();},800); },
+      /* 全屏跳脸大字 */
+      face: function(text, small){
+        var d=el('div','jumpscare-face'+(small?' small':'')); d.textContent=text||WORDS[Math.floor(Math.random()*WORDS.length)]; document.body.appendChild(d);
+        audioSting();
+        setTimeout(function(){d.remove();}, small?1400:2000);
+      },
+      /* 屏幕剧烈抖动+反色 */
+      shake: function(ms){ document.body.classList.add('violent-shake','invert-pulse'); audioDrone(55,ms/1000||2); setTimeout(function(){document.body.classList.remove('violent-shake','invert-pulse');},ms||2000); },
+      /* 文字腐败 */
+      corrupt: function(ms){ document.body.classList.add('text-rot'); audioDrone(80,ms/1000||3,'triangle'); setTimeout(function(){document.body.classList.remove('text-rot');},ms||3000); },
+      /* 扫描线 */
+      scanlines: function(ms){ var d=el('div','scanline-overlay'); document.body.appendChild(d); setTimeout(function(){d.remove();},ms||4000); },
+      /* 暗角呼吸 */
+      vignette: function(ms){ var d=el('div','vignette-breathe'); document.body.appendChild(d); setTimeout(function(){d.remove();},ms||6000); },
+      /* 眼符号 */
+      eye: function(ms){ var d=el('div','eye-symbol'); document.body.appendChild(d); setTimeout(function(){d.remove();},ms||5000); },
+      /* 跑马灯 */
+      crawl: function(text, ms){ var d=el('div','crawl-bar'); d.textContent=text||WORDS[Math.floor(Math.random()*WORDS.length)]; document.body.appendChild(d); setTimeout(function(){d.remove();},ms||10000); },
+      /* 组合：全面崩坏 */
+      breakdown: function(){ glitch.flash(); setTimeout(function(){glitch.shake(3000);glitch.scanlines(3500);glitch.vignette(4000);},200); setTimeout(function(){glitch.face('看 着 我',false);},600); audioDrone(40,5); },
+      /* 随机骚扰词 */
+      whisper: function(){ glitch.crawl(WORDS[Math.floor(Math.random()*WORDS.length)]+'  '+WORDS[Math.floor(Math.random()*WORDS.length)]+'  '+WORDS[Math.floor(Math.random()*WORDS.length)], 8000); }
+    };
+  })();
+
   var NAME2SLUG = {
     '默川生物科技': 'mochuan-bio', '默川生物': 'mochuan-bio', '默川': 'mochuan-bio', 'mochuan-bio': 'mochuan-bio', 'mochuan': 'mochuan-bio',
     '渊庭生物科技': 'yuanting-bio', '渊庭生物': 'yuanting-bio', '渊庭': 'yuanting-bio', 'yuanting-bio': 'yuanting-bio'
@@ -156,7 +197,7 @@
       var out = $('#biz-out');
       if (!slug) { out.innerHTML = '<div class="panel-sec" style="color:#6b7280">未查到该企业的工商档案。请使用完整企业名称。</div>'; return; }
       out.innerHTML = '<div class="panel-sec" style="color:#9aa1ab">查询中…</div>';
-      api('/api/business/' + slug).then(function (d) { if (!d.ok) { out.innerHTML = '<div class="panel-sec" style="color:#e5484d">查无此主体。</div>'; return; } out.innerHTML = bizCardHtml(d.biz); if (d.biz.slug === 'yuanting-bio' || d.biz.status.indexOf('注销') >= 0) flag('yuanting'); else if (d.biz.slug === 'mochuan-bio') flag('mochuan_biz'); });
+      api('/api/business/' + slug).then(function (d) { if (!d.ok) { out.innerHTML = '<div class="panel-sec" style="color:#e5484d">查无此主体。</div>'; return; } out.innerHTML = bizCardHtml(d.biz); if (d.biz.slug === 'yuanting-bio' || d.biz.status.indexOf('注销') >= 0) { flag('yuanting'); glitch.flash(); setTimeout(function(){glitch.crawl('注销 注销 换壳 它还在 它还在 它还在',8000);},500); } else if (d.biz.slug === 'mochuan-bio') flag('mochuan_biz'); });
     });
   }
   function bizCardHtml(b) {
@@ -207,6 +248,12 @@
       $('#co-fav').addEventListener('click', function () {
         api('/api/state').then(function (s) { if (!s.profile) { $('#login-mask').classList.add('show'); toast('请先登录'); return; } api('/api/favorite', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug: c.slug, name: c.name }) }).then(function () { toast('已收藏/取消'); }); });
       });
+      // 默川页面：渐进的压迫感
+      if (c.slug === 'mochuan-bio') {
+        setTimeout(function(){ glitch.vignette(15000); }, 8000);
+        setTimeout(function(){ glitch.scanlines(10000); glitch.crawl('年度最佳雇主 4.8 分 投递 1240 入职 405 留存 99.1%',15000); }, 15000);
+        setTimeout(function(){ glitch.eye(6000); }, 30000);
+      }
     });
   }
 
@@ -231,7 +278,7 @@
         for (var i = 1; i <= d.pages; i++) hp += '<button class="' + (i === p ? 'active' : '') + '" data-p="' + i + '">' + i + '</button>';
         hp += '<button ' + (p >= d.pages ? 'disabled' : '') + ' data-p="' + (p + 1) + '">下一页</button>';
         $('#rv-pager').innerHTML = hp;
-        if (rslug === 'mochuan-bio' && p >= 4) { dkFx('flash', 800); flag('reviews_deep'); }
+        if (rslug === 'mochuan-bio' && p >= 4) { glitch.flash(); setTimeout(function(){glitch.crawl('别投 我会回来的 下一个 别投 别投 别投',6000);},300); setTimeout(function(){glitch.scanlines(4000);},800); flag('reviews_deep'); }
         $$('#rv-pager button').forEach(function (b) { if (!b.disabled) b.addEventListener('click', function () { load(parseInt(b.dataset.p, 10)); window.scrollTo(0, 0); }); });
       });
     }
