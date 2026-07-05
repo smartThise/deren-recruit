@@ -10,14 +10,9 @@
   .doc { max-width: 660px; margin: 40px auto; padding: 0 24px; font-size: 14px; color: #374151; font-family: -apple-system,"PingFang SC",sans-serif; }
   .doc h1 { font-size: 18px; margin: 0 0 4px; }
   .doc .meta { color: #9aa1ab; font-size: 12.5px; margin-bottom: 22px; }
-  .gate { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:24px; margin:20px 0; }
-  .gate input { width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:4px; font-size:16px; font-family:monospace; letter-spacing:.15em; box-sizing:border-box; }
-  .gate button { margin-top:10px; padding:10px 24px; background:#1f2937; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:14px; }
-  .gate .hint { font-size:12px; color:#9aa1ab; margin-top:8px; }
-  .gate .err { color:#e5484d; font-size:12px; margin-top:6px; min-height:16px; }
-  .doc ul { padding-left:20px; }
-  .doc li { margin-bottom:6px; line-height:1.7; }
-  .doc .file { font-family: ui-monospace,monospace; color:#1466d6; }
+  .doc ul { padding-left: 20px; }
+  .doc li { margin-bottom: 6px; line-height: 1.7; }
+  .doc .file { font-family: ui-monospace,monospace; color: #1466d6; }
   .doc .tag { background: #f1f3f5; color: #6b7280; font-size: 11px; padding: 1px 6px; border-radius: 3px; margin-left: 6px; }
 </style>
 </head>
@@ -26,33 +21,10 @@
   <div class="meta">得人招聘 · 内部归档 · 仅工作人员参考</div>
   <h1>系统迁移归档</h1>
   <div class="meta">维护：平台工程组 · 最后更新 2024-07-22</div>
-  <p>本目录记录 v3 迁移期间保留的原始文件。以下内容涉及已注销主体的数据承接，访问需验证归档凭证。</p>
-
-  <div class="gate">
-    <div style="font-weight:600;margin-bottom:6px">归档凭证</div>
-    <input id="pass" type="text" placeholder="输入归档凭证" autocomplete="off" spellcheck="false" />
-    <button id="submit">验证</button>
-    <div id="err" class="err"></div>
-    <div class="hint">提示：凭证格式为 yyyyMMdd。那家注销的公司，死在什么时候？</div>
-  </div>
-
-  <h2>文件</h2>
+  <p>本目录记录 v3 迁移期间保留的原始文件。</p>
   <ul>
-    <li><span class="file">v3/</span><span class="tag">2024-07 · 渊庭承接</span></li>
+    <li><span class="file"><a href="/archive/v3/">v3/</a></span><span class="tag">2024-07</span></li>
   </ul>
 </div>
-<script>
-document.getElementById('submit').addEventListener('click', function(){
-  var v = document.getElementById('pass').value.trim();
-  if (!v) return;
-  fetch('/api/archive/enter',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pass:v})})
-    .then(function(r){ return r.text(); })
-    .then(function(t){
-      if (t === '/archive/v3/') { location.href = t; }
-      else { document.getElementById('err').textContent = '凭证错误。'; }
-    });
-});
-document.getElementById('pass').addEventListener('keydown', function(e){ if(e.key==='Enter') document.getElementById('submit').click(); });
-</script>
 </body>
 </html>

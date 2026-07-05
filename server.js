@@ -475,7 +475,7 @@ function makeHandler(root, kind) {
       if (u.pathname.startsWith('/api/')) { const s = getOrCreate(req, res); const fn = kind === 'main' ? apiMain : apiEmp; return await fn(s, req, res, u); }
       if (kind === 'main' && u.pathname.startsWith('/archive/')) {
         const ss = getOrCreate(req, res);
-        if (!u.pathname.startsWith('/archive/v3/')) { return res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Backend-API': '/api/archive/enter', 'X-Archive-Owner': 'yuanting' }).end('<h1>403 Forbidden</h1>'); }
+        if (!u.pathname.startsWith('/archive/v3/')) { return res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Backend-API': '/api/archive/enter', 'X-Archive-Owner': 'yuanting', 'X-Format': 'thatDate' }).end('<h1>403 Forbidden</h1>'); }
         if (!ss.archiveUnlocked) { return res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end('<h1>403 Forbidden</h1>'); }
         if (u.pathname === '/archive/v3/message.html' && !ss.dbUnlocked) { return res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end('<h1>403 Forbidden</h1>'); }
       }
@@ -634,7 +634,7 @@ if (IS_RENDER || MAIN_ONLY) {
         return res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end('<h1>403 Forbidden</h1>');
       }
       if (!u.pathname.startsWith('/archive/v3/')) { /* /archive/ 根始终可访问 */ }
-      else if (!ss.archiveUnlocked) { return res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end('<h1>403 Forbidden</h1>'); }
+      else if (!ss.archiveUnlocked) { return res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Backend-API': '/api/archive/enter', 'X-Archive-Owner': 'yuanting', 'X-Format': 'thatDate' }).end('<h1>403 Forbidden</h1>'); }
       if (u.pathname === '/archive/v3/message.html' && !ss.dbUnlocked) { return res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end('<h1>403 Forbidden</h1>'); }
     }
     serveStaticProd(res, PUBLIC, u.pathname, '');
