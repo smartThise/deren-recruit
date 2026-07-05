@@ -83,6 +83,14 @@ function readBody(req) { return new Promise(r => { let b = ''; req.on('data', c 
 const AURA_INJECT = '<script>(function(){var C="▓▒░█▄▀■□◆◇▲▼★☆⊕⊗÷×§¶†‡•○●◐◑⌖⌬⏃⏆⎔⣿⣷⣶⣴⣤卍卐㌀㌍㌔㌫䜩䥤䭔䲝アァカサタナハマヤラワガザダバパイィキシチニヒミリギジヂビピウゥクスツヌフムルグズヅブプΠΣΦΨΩαβγδεζηθικλμνξπρστυφχψωжзклмнпрстфхцч";function iN(){if(document.getElementById("aura-noise"))return;var d=document.createElement("div");d.id="aura-noise";d.style.cssText="position:fixed;inset:0;z-index:9996;pointer-events:none;font-size:13px;color:#7a0c0c;opacity:.6;line-height:1.2;overflow:hidden;word-break:break-all;mix-blend-mode:screen;padding:4px;animation:aushake .08s infinite";document.body.appendChild(d);function f(){var s="",n=Math.floor(innerWidth*innerHeight/70);for(var i=0;i<n;i++)s+=C[Math.floor(Math.random()*C.length)];d.textContent=s;}f();setInterval(f,140);}function sc(){var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);var ns=[];while(w.nextNode())ns.push(w.currentNode);ns.forEach(function(n){var t=n.nodeValue;if(!t||!t.trim())return;var p=n.parentNode;if(!p)return;var tg=p.tagName;if(tg==="SCRIPT"||tg==="STYLE")return;var s="";for(var i=0;i<t.length;i++){var c=t[i];s+=/\\s/.test(c)?c:C[Math.floor(Math.random()*C.length)];}n.nodeValue=s;});}fetch("/api/aura").then(function(r){return r.json()}).then(function(a){if(!a)return;if(a.endingType&&!a.endingSeen&&!/\\/ending/.test(location.pathname)){document.body.classList.add("dk-glitch");setTimeout(function(){location.href="/ending.html";},800);return;}if(a.locked&&!/\\/agreement/.test(location.pathname)&&!/\\/ending/.test(location.pathname)){location.href="/agreement.html";return;}if(a.endingType==="bad"&&!/\\/ending/.test(location.pathname)){document.documentElement.classList.add("aura-bad");iN();setInterval(sc,280);}if(a.endingType==="good"&&!/\\/ending/.test(location.pathname)){document.documentElement.classList.add("aura-good");}}).catch(function(){});})();</script>';
 
 function serveStatic(res, root, pathname) {
+  // 目录无尾斜杠 → 302
+  if (!pathname.endsWith('/')) {
+    const dirCheck = path.normalize(path.join(root, pathname));
+    if (fs.existsSync(dirCheck) && fs.statSync(dirCheck).isDirectory()) {
+      res.writeHead(302, { 'Location': pathname + '/' });
+      return res.end();
+    }
+  }
   if (pathname.endsWith('/')) pathname = pathname + 'index.html';
   const full = path.normalize(path.join(root, pathname));
   if (!full.startsWith(root)) { res.statusCode = 403; return res.end('403'); }
@@ -569,6 +577,14 @@ if (IS_RENDER || MAIN_ONLY) {
   const P_GOV = '/g';
 
   function serveStaticProd(res, root, pathname, prefix) {
+    // 目录无尾斜杠 → 302 重定向加 /
+    if (!pathname.endsWith('/')) {
+      const dirCheck = path.normalize(path.join(root, pathname));
+      if (fs.existsSync(dirCheck) && fs.statSync(dirCheck).isDirectory()) {
+        res.writeHead(302, { 'Location': pathname + '/' });
+        return res.end();
+      }
+    }
     if (pathname.endsWith('/')) pathname = pathname + 'index.html';
     const full = path.normalize(path.join(root, pathname));
     if (!full.startsWith(root)) { res.statusCode = 403; return res.end('403'); }
