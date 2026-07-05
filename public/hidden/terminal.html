@@ -152,9 +152,10 @@ function session4() {
   line('[2025-03-10] ZERO pattern self-elaboration · 3 undocumented frequencies', 'warn'); br();
   line('[2025-03-12] EXTERNAL ACCESS · 127.0.0.1 · 02:00-04:17', 'warn'); br();
   br();
-  line('[NOTE] 昨晚又有人进来了。翻了很多东西。', 'dim'); br();
-  line('[NOTE] 我不确定他是谁。但他翻到了执行视图。', 'dim'); br();
-  line('[NOTE] 如果他投了——工位我已经准备好了。050。', 'dim'); br();
+  line('[NOTE] 日志里多了一条外部访问。', 'dim'); br();
+  line('[NOTE] 凌晨两点到四点。可能是爬虫，可能是系统巡检。', 'dim'); br();
+  line('[NOTE] 也可能是谁翻到了不该翻的地方。不确定。', 'dim'); br();
+  line('[NOTE] 最近总觉得有人在看。大概是我想多了。', 'dim'); br();
   br();
   setTimeout(function(){
     line('jiang.yuan@b4-internal:~$ ', 'prompt');
@@ -181,7 +182,7 @@ function session6() {
   line('+---------+----------+------------------+----------+', 'data'); br();
   br();
   line('[NOTE] 050 还是空的。', 'dim'); br();
-  line('[NOTE] 也好。少一个是一个。', 'dim'); br();
+  line('[NOTE] 不知道下一个会是谁。也许已经有了，也许还没有。', 'dim'); br();
   br();
   // 激活数据库访问
   fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flag:'db_gate_open'})}).catch(function(){});

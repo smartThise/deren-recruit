@@ -102,21 +102,6 @@
   fetch('/api/state').then(function(st){
     if(!st||!st.progress)return;
     var clues=st.progress.clues||[];
-    // genesis 已读但 terminal 未读 → 首次回首页时信号干扰泄露 terminal 链接
-    if(clues.indexOf('genesis_read')>=0 && clues.indexOf('terminal_read')<0 && !sessionStorage.getItem('sig_leak_shown')){
-      sessionStorage.setItem('sig_leak_shown','1');
-      setTimeout(function(){
-        glitch.flash();
-        setTimeout(function(){
-          var s=document.createElement('div');
-          s.style.cssText='position:fixed;top:35%;left:50%;transform:translate(-50%,-50%);z-index:10001;pointer-events:none;font-family:monospace;font-size:15px;color:#1a5a1a;background:rgba(0,0,0,.95);padding:16px 24px;border:1px solid #1a6a1a;border-radius:4px;text-shadow:0 0 10px #1a6a1a;opacity:0;transition:opacity .2s;text-align:center;line-height:1.8';
-          s.innerHTML='SIGNAL_LEAK :: B4-NODE-7<br>████ <span style=\"color:#4a8a4a\">/hidden/terminal</span> ████<br><span style=\"font-size:11px;color:#3a6a3a\">终末站在等你</span>';
-          document.body.appendChild(s);
-          setTimeout(function(){s.style.opacity='1';},200);
-          setTimeout(function(){s.style.opacity='0';setTimeout(function(){s.remove();},500);},4000);
-        },400);
-      },2000+Math.random()*3000);
-    }
     // terminal 已读 → 意识碎片（随机短暂跳脸）
     if(clues.indexOf('terminal_read')>=0 && Math.random()<.2 && !/\/ending/.test(location.pathname)){
       setTimeout(function(){
