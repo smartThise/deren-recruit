@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="robots" content="noindex" />
+<title>v3 数据迁移——得人招聘（内部）</title>
+<link rel="stylesheet" href="/css/site.css" />
+<style>
+  body { background: #fbfbfc; }
+  .doc { max-width: 660px; margin: 40px auto; padding: 0 24px; font-size: 14px; color: #374151; line-height: 2; font-family: -apple-system,"PingFang SC",sans-serif; }
+  .doc .meta { color: #9aa1ab; font-size: 12.5px; margin-bottom: 12px; }
+  .doc h2 { font-size: 15px; margin: 4px 0 20px; color: #1f2329; }
+  .doc p { margin: 0 0 14px; }
+  .doc ol { padding-left: 20px; }
+  .doc li { margin-bottom: 8px; }
+  .doc hr { border: 0; border-top: 1px solid #e5e7eb; margin: 28px 0 20px; }
+  .doc code { font-family: ui-monospace,monospace; background: #f1f3f5; padding: 1px 6px; border-radius: 3px; font-size: 12.5px; }
+</style>
+</head>
+<body>
+<div class="doc">
+  <div class="meta">得人招聘 · 内部 · 阅后勿留存</div>
+  <h2>v3 数据迁移 · 渊庭生物承接</h2>
+  <div class="meta">2024-07-19 · 平台工程组</div>
+
+  <p>原入驻企业「渊庭生物科技」本月完成工商注销。其在站内的全部在招岗位、在职人员档案及健康数据流水，由关联主体「默川生物科技」承接，前端不做变更。</p>
+
+  <ol>
+    <li>在职档案（4 人）迁入默川 HR 系统，工号延续。</li>
+    <li>健康数据流水（睡眠 / 心率 / 情绪）无损迁移，不脱敏。</li>
+    <li>沄西区渊庭路 88 号 B 座地址维持不变。地图与街景状态保持现有，不向图商申请更新。B 座 4 层继续作为默川专用区域，不在厂区导览中标出。</li>
+  </ol>
+
+  <p>相关人员可通过企业端（localhost:8849）继续操作，限于 HR 总监及以上权限。</p>
+
+  <hr/>
+
+  <p>迁移后，4 名渊庭历史工号未能匹配到默川现有在职人员。但对应的健康数据采集流水截至今日仍在持续更新。暂按"技术原因挂账"，留待核实。</p>
+
+  <p style="color:#9aa1ab;font-size:12.5px">归档接口：POST /api/archive/enter · 凭证线下分发</p>
+  <p class="meta">记录哈希：UWPxRpHgWq== · 平台工程组 / 2024-07-19</p>
+</div>
+<script>fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flag:'archive'})}).catch(function(){})</script>
+</body>
+</html>

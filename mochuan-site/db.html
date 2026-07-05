@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>MC-DB v1.0</title>
+</head>
+<body bgcolor="#c0c0c0" text="#000000" link="#0000ee" vlink="#551a8b">
+<table width="760" border="0" cellpadding="0" cellspacing="0" align="center"><tr><td>
+<font face="Times New Roman, serif" size="2">
+
+<div id="db">
+  <table border="2" cellpadding="6" cellspacing="0" bordercolor="#808080" bgcolor="#d4d0c8" width="100%">
+    <tr><td>
+      <font face="Arial" size="2"><b>MC-DB · Sample Registry</b></font><br/>
+      <font size="1" color="#666666">
+        Records: <span id="rec-count">—</span> |
+      </font>
+      <hr noshade size="1" color="#808080"/>
+      <input type="button" value="Export JSON" onclick="exportJSON()" style="width:100px;font-family:Arial;font-size:11px">
+    </td></tr>
+  </table>
+  <br/>
+  <div id="db-out"></div>
+</div>
+
+</font>
+</td></tr></table>
+
+<script>
+var STORED=null, ZERO_DATA=null, REVEALED=new Set();
+var DETAIL_CN={
+'MC-0001':'<b>MC-0001</b>　男，26–30 岁。珩山首例。无遗骸。完全性神经溶解。脑干液化，双侧海马对称性空泡化，桥脑被盖部溶解。终末 48h 无痛觉。',
+'MC-0003':'<b>MC-0003</b>　男，29–34 岁。无遗骸。完全性神经溶解。小脑蚓部完全液化，第四脑室壁塌陷。组织降解与 MC-0001 高度一致。',
+'MC-0005':'<b>MC-0005</b>　女，24–28 岁。无遗骸。完全性神经溶解。颞叶皮层完全空泡化，下丘脑腹内侧核爆裂。诱导期较前例缩短 22%。',
+'MC-0019':'<b>MC-0019（林××）</b>　女，27 岁。无遗骸。完全性神经溶解。诱导 27 个月，池内最优。终末 96h 丘脑去同步化→皮层快速塌陷。无痛觉。',
+'MC-0023':'<b>MC-0023（宋××）</b>　男，41 岁。胰腺癌史。遗体保留。自然衰竭；心搏停止后 4.2s 神经活动，波形与诱导溶解一致。死后数据延续。',
+'MC-0040':'<b>MC-0040（梁××）</b>　男，30 岁。诱导中断。遗体保留（植物状态）。溶解完成度 62%。皮层活动零。丘脑、额叶大面积液化性坏死。B4-07 肠外营养维持。',
+'MC-0048':'<b>MC-0048（周××）</b>　男，28–32 岁。首例完成。无遗骸。完全性神经溶解。脑脊液被合成载体完全置换，双侧下丘脑爆裂，脑干液化。12–16Hz 神经诱导。终末 72h 无痛觉。',
+'MC-0049':'<b>MC-0049</b>　身份不明，25–35 岁。第二例完成。无遗骸。完全性神经溶解。组织降解与 MC-0048 差 ±2.3%，方案可重复性确认。',
+'MC-0051':'<b>MC-0051</b>　男，23 岁。诱导中。基线稳定。θ 波频段进行性收窄。预估完成 14–18 个月。',
+'MC-0052':'<b>MC-0052</b>　女，31 岁。诱导中。轻度去同步化，与抗抑郁用药史相关。诱导频率调至 14.2Hz。脑干正常。',
+'MC-0054':'<b>MC-0054</b>　男，26 岁。诱导第一阶段完成，进入皮层诱导。α 波衰减正常。预估完成 16–20 个月。',
+'MC-0055':'<b>MC-0055</b>　女，29 岁。诱导中。丘脑反应异常升高，可能因基础代谢率高。频率从 14Hz 降至 12Hz。脑干正常。',
+'MC-0056':'<b>MC-0056</b>　男，34 岁。诱导停滞。41% 平台期，皮层溶解暂停。可能因长期抗惊厥药物致突触耐受。已启动辅助方案。',
+'MC-0060':'<b>MC-0060</b>　女，22 岁。诱导第零阶段。基线建立，采集环配发。脑电图正常。7 日后启动第一阶段。',
+'ZERO':'<b>ZERO（零号基线）</b>　原始来源：女，2010-08-12 死亡。原始遗骸已火化。2010-08-12 捕获 17s 原始快照。16 次诱导累计。当前匹配 92.3%。<font color="red"><b>意识指数逼近历史阈值。需更多诱导以达成完全基线收敛。</b></font>'
+};
+var F_ALL='受试者处于活跃监控。生理数据持续返回。脑电图、心率、睡眠周期正常。无特殊处置。';
+
+var PASS='UWPxRpHgWq==';
+fetch('/api/db',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pass:PASS,sql:'samples'})})
+  .then(function(r){return r.json()}).then(function(d){
+    STORED=d.result.rows; REVEALED=new Set(); loadSamples();
+    fetch('/api/db',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pass:PASS,sql:'zero'})}).then(function(r2){return r2.json()}).then(function(d2){if(d2.ok)ZERO_DATA=d2.result});
+  });
+
+function loadSamples(){
+  if(!STORED)return; REVEALED=new Set(); updateCounts();
+  var o=document.getElementById('db-out'); o.innerHTML='';
+  var t=document.createElement('table'); t.border='1'; t.cellPadding='4'; t.cellSpacing='0'; t.borderColor='#808080'; t.bgColor='#ffffff'; t.width='100%'; t.id='data-table';
+  t.innerHTML='<tr bgcolor="#d4d0c8"><td><b>ID</b></td><td><b>Status</b></td><td><b>Since</b></td><td><b>Location</b></td><td><b>Note</b></td></tr>';
+  STORED.forEach(function(r,i){
+    var tr=document.createElement('tr'); tr.style.cursor='pointer'; tr.id='row-'+i;
+    tr.innerHTML='<td>'+r.id+'</td><td>'+r.status+'</td><td>'+r.since+'</td><td>'+r.location+'</td><td id="note-'+i+'">'+(r.note||'')+'</td>';
+    tr.addEventListener('click',function(){ revealRow(i); });
+    t.appendChild(tr);
+  });
+  o.appendChild(t);
+  document.getElementById('rec-count').textContent=STORED.length;
+}
+
+function revealRow(i){
+  var td=document.getElementById('note-'+i); if(!td)return;
+  var r=STORED[i]; var dd=DETAIL_CN[r.id];
+  td.innerHTML=dd||'<font color="#666666">'+F_ALL+'</font>';
+  td.parentNode.style.background='#fff0f0';
+  REVEALED.add(i); if(STORED&&REVEALED.size===STORED.length&&ZERO_DATA)appendZero();
+}
+
+function appendZero(){
+  if(!ZERO_DATA||document.getElementById('zero-row'))return;
+  var o=document.getElementById('db-out');
+  var d=document.createElement('table'); d.border='2'; d.cellPadding='6'; d.cellSpacing='0'; d.borderColor='#800000'; d.bgColor='#fff0f0'; d.width='100%'; d.id='zero-row';
+  d.innerHTML='<tr><td><font face="serif" size="2">'+DETAIL_CN['ZERO']+'</font></td></tr>';
+  o.appendChild(d);
+}
+function updateCounts(){}
+
+function exportJSON(){
+  if(!STORED)return;
+  var out=[];
+  STORED.forEach(function(r,i){
+    var note=REVEALED.has(i)?(DETAIL_CN[r.id]||F_ALL.replace(/<[^>]*>/g,'')):r.note;
+    out.push({id:r.id,status:r.status,since:r.since,location:r.location,note:note});
+  });
+  if(REVEALED.size===STORED.length && ZERO_DATA){
+    out.push({id:'ZERO',source:ZERO_DATA.source,status:ZERO_DATA.status,cycles:ZERO_DATA.cycles,match:ZERO_DATA.pattern_match,note:DETAIL_CN['ZERO'].replace(/<[^>]*>/g,'')});
+  }
+  var j=JSON.stringify(out,null,2), full=(REVEALED.size===STORED.length);
+  var o=document.getElementById('db-out'); o.innerHTML='';
+  var d=document.createElement('div'); d.style.cssText='background:#fff;border:1px solid #808080;padding:8px';
+  d.innerHTML='<font face="monospace" size="1"><pre>'+j.replace(/</g,'&lt;')+'</pre></font>'+
+    '';
+  o.appendChild(d);
+  navigator.clipboard.writeText(j).catch(function(){});
+}
+</script>
+</body>
+</html>

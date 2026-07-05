@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>沄西区市场监管综合服务平台 · 企业信息公示</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; color: #1f2937; background: #f4f6f8; font-size: 14px; }
+  a { color: #1d4ed8; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .gov-bar { background: linear-gradient(90deg, #b91c1c, #c1272d); color: #fff; }
+  .gov-bar-in { max-width: 1100px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; gap: 14px; }
+  .gov-bar .emblem { font-size: 26px; }
+  .gov-bar .t1 { font-size: 18px; font-weight: 700; letter-spacing: .02em; }
+  .gov-bar .t2 { font-size: 12px; opacity: .85; }
+  .crumb { background: #fff; border-bottom: 1px solid #e5e7eb; font-size: 12.5px; color: #6b7280; }
+  .crumb-in { max-width: 1100px; margin: 0 auto; padding: 9px 24px; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 22px 24px 60px; }
+  .search-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 20px 24px; margin-bottom: 18px; }
+  .search-card h1 { font-size: 19px; margin-bottom: 4px; color: #b91c1c; }
+  .search-card p { color: #6b7280; font-size: 13px; margin-bottom: 14px; }
+  .search-card form { display: flex; gap: 8px; }
+  .search-card input { flex: 1; padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; font-family: inherit; }
+  .search-card button { background: #b91c1c; color: #fff; border: 0; padding: 0 22px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; border-radius: 4px; }
+  .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 16px; }
+  .panel-h { background: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 11px 18px; font-weight: 700; color: #1f2937; font-size: 14.5px; display: flex; align-items: center; gap: 8px; }
+  .panel-h .tag { font-size: 11px; font-weight: 400; color: #6b7280; margin-left: auto; }
+  .panel-b { padding: 14px 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid #f1f3f5; }
+  th { color: #6b7280; font-weight: 600; background: #fafbfc; }
+  tr:last-child td { border-bottom: 0; }
+  .status-ok { color: #16a34a; }
+  .status-no { color: #9aa1ab; }
+  .status-pending { color: #b91c1c; font-weight: 600; }
+  .pending-row { background: #fef2f2; }
+  .info-row { display: flex; gap: 24px; flex-wrap: wrap; font-size: 13px; color: #4b5563; }
+  .info-row b { color: #1f2937; }
+  .empty { padding: 30px; text-align: center; color: #9aa1ab; }
+  .news-item { padding: 9px 0; border-bottom: 1px solid #f1f3f5; display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
+  .news-item:last-child { border-bottom: 0; }
+  .news-item .t { color: #1f2937; }
+  .news-item .d { color: #9aa1ab; font-size: 12px; white-space: nowrap; }
+  .hint { font-size: 12.5px; color: #9aa1ab; margin-top: 8px; }
+  .foot { border-top: 2px solid #b91c1c; background: #f9fafb; color: #6b7280; font-size: 12.5px; }
+  .foot-in { max-width: 1100px; margin: 0 auto; padding: 18px 24px; line-height: 1.9; }
+</style>
+</head>
+<body>
+<div class="gov-bar"><div class="gov-bar-in">
+  <span class="emblem">❀</span>
+  <div><div class="t1">沄西区市场监管综合服务平台</div><div class="t2">Yunxi District Market Regulation &amp; Service Platform · 政务公开</div></div>
+</div></div>
+<div class="crumb"><div class="crumb-in">首页 &gt; 企业信息公示 &gt; 查询</div></div>
+
+<div class="wrap">
+  <div class="search-card">
+    <h1>企业信息公示查询</h1>
+    <p>输入企业全称或关键字，查询登记信息、行政许可、行政处罚、监督检查与投诉举报公示。本平台数据仅供公众参考。</p>
+    <form id="f"><input id="q" type="text" placeholder="输入企业名称查询" /><button type="submit">查询</button></form>
+    <div class="hint">数据来源：区市场监督管理局 / 区委网信办 / 区人社局。更新至 2025-03。</div>
+  </div>
+  <div id="out"></div>
+
+  <div class="panel" style="margin-top:18px"><div class="panel-h">通知公告<span class="tag">区市场监管局</span></div><div class="panel-b">
+    <div class="news-item"><span class="t">关于开展 2025 年人力资源市场秩序专项整治行动的通知</span><span class="d">2025-03-20</span></div>
+    <div class="news-item"><span class="t">关于"健康数据"类用工授权的合规提示（用人单位应取得劳动者书面自愿授权，不得以入职为强制前提）</span><span class="d">2025-02-18</span></div>
+    <div class="news-item"><span class="t">关于注销主体承接的企业登记与劳动关系承接指引</span><span class="d">2024-08-30</span></div>
+    <div class="news-item"><span class="t">2025 年清明节期间政务服务窗口安排</span><span class="d">2025-03-25</span></div>
+    <div class="news-item"><span class="t">2024 年度市场监管领域投诉举报数据分析报告</span><span class="d">2025-01-15</span></div>
+  </div></div>
+
+  <div class="panel" style="margin-top:14px"><div class="panel-h">政策法规</div><div class="panel-b">
+    <div class="news-item"><span class="t">中华人民共和国劳动合同法</span><span class="d">现行</span></div>
+    <div class="news-item"><span class="t">中华人民共和国个人信息保护法</span><span class="d">现行</span></div>
+    <div class="news-item"><span class="t">中华人民共和国数据安全法</span><span class="d">现行</span></div>
+    <div class="news-item"><span class="t">医疗器械监督管理条例</span><span class="d">现行</span></div>
+    <div class="news-item"><span class="t">人力资源市场暂行条例</span><span class="d">现行</span></div>
+  </div></div>
+</div>
+
+<footer class="foot"><div class="foot-in">
+  主办单位：沄西区市场监督管理局　|　协办：区委网信办、区人社局、区卫健委<br/>
+  办公地址：沄西区政务路 100 号　|　咨询电话：0731-12315　|　政府网站标识码：2901150007<br/>
+  © 沄西区人民政府　沄ICP备 2024 区政务 号　技术支持：沄西区大数据中心
+</div></footer>
+
+<script>
+(function(){
+  var q = new URLSearchParams(location.search).get('q') || '';
+  document.getElementById('q').value = q;
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function search(name){
+    var out = document.getElementById('out');
+    if(!name){ out.innerHTML = '<div class="panel"><div class="panel-b empty">请输入企业名称进行查询。</div></div>'; return; }
+    out.innerHTML = '<div class="panel"><div class="panel-b empty">查询中…</div></div>';
+    fetch('/api/record?q=' + encodeURIComponent(name)).then(function(r){return r.json();}).then(function(d){
+      if(!d.ok){ out.innerHTML = '<div class="panel"><div class="panel-b empty">未查到相关企业。请核对名称后重试。</div></div>'; return; }
+      var r2 = d.record;
+      var html = '';
+      html += '<div class="panel"><div class="panel-h">登记与经营状态<span class="tag">区市场监管局</span></div><div class="panel-b"><div class="info-row"><span>企业名称：<b>'+esc(r2.name)+'</b></span><span>状态：<b class="'+(r2.status.indexOf('注销')>=0?'status-pending':'status-ok')+'">'+esc(r2.status)+'</b></span></div>'+ (r2.note?'<div style="margin-top:10px;color:#6b7280;font-size:13px">'+esc(r2.note)+'</div>':'') +'</div></div>';
+      html += '<div class="panel"><div class="panel-h">行政许可<span class="tag">共 '+r2.licenses.length+' 项</span></div><div class="panel-b">';
+      html += r2.licenses.length ? '<table><tr><th>许可名称</th><th>文号</th><th>日期</th><th>有效期</th></tr>'+r2.licenses.map(function(l){return '<tr><td>'+esc(l.name)+'</td><td style="color:#6b7280">'+esc(l.no)+'</td><td>'+esc(l.date)+'</td><td>'+esc(l.valid)+'</td></tr>';}).join('')+'</table>' : '<div class="empty">无公示许可。</div>';
+      html += '</div></div>';
+      html += '<div class="panel"><div class="panel-h">行政处罚<span class="tag">近三年</span></div><div class="panel-b">'+ (r2.penalties.length?'<table>'+r2.penalties.map(function(p){return '<tr><td>'+esc(p.title)+'</td><td>'+esc(p.date)+'</td></tr>';}).join('')+'</table>' : '<div class="status-ok">✔ 近三年无行政处罚记录。</div>') +'</div></div>';
+      html += '<div class="panel"><div class="panel-h">监督检查<span class="tag">区市场监管局 / 网信办</span></div><div class="panel-b"><table><tr><th>时间</th><th>事项</th><th>结果</th><th>部门</th></tr>'+r2.inspections.map(function(i){return '<tr><td>'+esc(i.date)+'</td><td>'+esc(i.item)+'</td><td>'+esc(i.result)+'</td><td style="color:#6b7280">'+esc(i.dept)+'</td></tr>';}).join('')+'</table></div></div>';
+      html += '<div class="panel"><div class="panel-h">投诉举报公示<span class="tag">共 '+r2.complaints.length+' 条</span></div><div class="panel-b">';
+      html += r2.complaints.length ? '<table><tr><th>时间</th><th>反映事项</th><th>来源</th><th>处理结果</th><th>状态</th></tr>'+r2.complaints.map(function(c){ var pending = c.status.indexOf('暂存')>=0; return '<tr class="'+(pending?'pending-row':'')+'"><td>'+esc(c.date)+'</td><td>'+esc(c.title)+'</td><td style="color:#6b7280">'+esc(c.from)+'</td><td style="color:#374151">'+esc(c.result)+'</td><td class="'+(pending?'status-pending':'status-ok')+'">'+esc(c.status)+'</td></tr>';}).join('')+'</table>' : '<div class="empty">无投诉举报公示。</div>';
+      html += '</div></div>';
+      html += '<div style="margin-top:14px"><a href="/report.html?q='+encodeURIComponent(r2.name)+'" style="color:#b91c1c;font-size:13px">举报该企业 →</a></div>';
+      out.innerHTML = html;
+    }).catch(function(){ out.innerHTML = '<div class="panel"><div class="panel-b empty">查询失败，请稍后重试。</div></div>'; });
+  }
+  document.getElementById('f').addEventListener('submit', function(e){ e.preventDefault(); search(document.getElementById('q').value.trim()); });
+  if(q) search(q);
+})();
+</script>
+<style>
+html.aura-bad,html.aura-bad body{background:#0a0000!important}
+html.aura-bad body{color:#6a1414!important;animation:aushake .1s infinite}
+html.aura-bad *{color:#8a1a1a!important;background-color:transparent!important;text-shadow:0 0 1px #ff0000}
+html.aura-bad a{color:#bb2222!important}
+@keyframes aushake{0%,100%{transform:translate(0,0)}25%{transform:translate(-2px,1px)}50%{transform:translate(3px,-1px)}75%{transform:translate(-1px,-2px)}}
+html.aura-bad::after{content:'碎 噪 乱 碎 噪 噪 乱 碎 碎 噪 乱';position:fixed;inset:0;pointer-events:none;z-index:9997;font-family:monospace;font-size:9px;color:#2a0000;opacity:.16;overflow:hidden}
+html.aura-good body{background:#fff!important}
+html.aura-good::after{content:'一切都干净了。';position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;color:#1f2329;font-family:"FangSong",serif;font-size:22px;letter-spacing:.3em;z-index:9998}
+</style>
+<script>function injectNoise(){if(document.getElementById('aura-noise'))return;var d=document.createElement('div');d.id='aura-noise';d.style.cssText='position:fixed;inset:0;z-index:9996;pointer-events:none;font-size:13px;color:#7a0c0c;opacity:.62;line-height:1.2;overflow:hidden;word-break:break-all;mix-blend-mode:screen;padding:4px;animation:aushake .08s infinite';document.body.appendChild(d);var C='▓▒░█▄▀■□◆◇▲▼★☆⊕⊗÷×§¶†‡•○●◐◑⌖⌬⏃⏆⎔⣿⣷⣶⣴⣤卍卐㌀㌍㌔㌫䜩䥤䭔䲝アァカサタナハマヤラワガザダバパイィキシチニヒミリギジヂビピウゥクスツヌフムルグズヅブプΠΣΦΨΩαβγδεζηθικλμνξπρστυφχψωжзклмнпрстфхцч';function fill(){var s='',n=Math.floor(window.innerWidth*window.innerHeight/70);for(var i=0;i<n;i++)s+=C[Math.floor(Math.random()*C.length)];d.textContent=s;}fill();setInterval(fill,140);}
+fetch('/api/aura').then(function(r){return r.json()}).then(function(a){if(!a)return;if(a.endingType&&!a.endingSeen){document.body.classList.add('dk-glitch');setTimeout(function(){location.href='http://localhost:3751/ending.html';},800);return;}if(a.locked){location.href='http://localhost:3751/agreement.html';}if(a.endingType==='bad'){document.documentElement.classList.add('aura-bad');setTimeout(injectNoise,60);setInterval(function(){var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);var ns=[];while(w.nextNode())ns.push(w.currentNode);ns.forEach(function(n){var t=n.nodeValue;if(!t||!t.trim())return;var p=n.parentNode;if(!p||p.tagName==='SCRIPT'||p.tagName==='STYLE')return;var K='▓▒░█▄▀■□◆◇▲▼★☆⊕⊗÷×§¶†‡•○●◐◑⌖⌬⏃⏆⎔⣿⣷⣶⣴⣤卍卐㌀㌍㌔㌫䜩䥤䭔䲝アァカサタナハマヤラワガザダバパイィキシチニヒミリギジヂビピウゥクスツヌフムルグズヅブプΠΣΦΨΩαβγδεζηθικλμνξπρστυφχψωжзклмнпрстфхцч';var s='';for(var i=0;i<t.length;i++){var c=t[i];s+=/\s/.test(c)?c:K[Math.floor(Math.random()*K.length)];}n.nodeValue=s;});},280);}if(a.endingType==='good'){document.documentElement.classList.add('aura-good');}}).catch(function(){});</script>
+</body>
+</html>

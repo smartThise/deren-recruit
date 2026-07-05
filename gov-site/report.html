@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>企业举报 · 沄西区市场监管综合服务平台</title>
+<style>
+@keyframes aushake{0%,100%{transform:translate(0,0)}20%{transform:translate(-2px,1px)}40%{transform:translate(3px,-1px)}60%{transform:translate(-1px,-2px)}80%{transform:translate(2px,1px)}}
+
+  body{font-family:"FangSong","仿宋",serif;background:#f4f6f8;color:#1f2937;margin:0}
+  .gov-bar{background:linear-gradient(90deg,#b91c1c,#c1272d);color:#fff;padding:14px 24px;font-size:14px}
+  .wrap{max-width:700px;margin:40px auto;padding:0 24px}
+  h1{font-size:20px;margin:0 0 6px;color:#b91c1c}
+  .sub{color:#6b7280;font-size:13px;margin-bottom:20px}
+  textarea{width:100%;height:200px;border:1px solid #d1d5db;border-radius:4px;padding:10px;font-family:monospace;font-size:12px;resize:vertical}
+  .btns{margin-top:8px;display:flex;gap:10px}
+  .btn-lock{transition:all .08s}
+  .btn-submit{background:#16a34a;color:#fff;border:0;padding:10px 24px;font-size:14px;cursor:pointer;font-family:inherit;border-radius:4px}
+  .btn-cancel{background:#6b7280;color:#fff;border:0;padding:10px 24px;font-size:14px;cursor:pointer;font-family:inherit;border-radius:4px}
+  #status{font-size:14px;margin-top:10px;min-height:20px}
+  #scare-box{position:fixed;inset:0;pointer-events:none;z-index:999;display:none;overflow:hidden}
+  #scare-box div{position:absolute;color:#b91c1c;font-weight:bold;font-size:14px;animation:sk 1.5s linear;white-space:nowrap}
+  @keyframes sk{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(60px,-100px)}}
+  #fake-cursor{display:none;position:fixed;pointer-events:none;z-index:9999}
+</style>
+</head>
+<body>
+<div class="gov-bar"><span>沄西区市场监管综合服务平台 · 举报提交</span></div>
+<div class="wrap">
+  <h1>企业举报材料提交</h1>
+  <div class="sub" id="rp-sub">粘贴举报材料。</div>
+  <textarea id="json-in" placeholder='粘贴合适的举报材料'></textarea>
+  <div id="scare" style="color:#b91c1c;font-size:13px;min-height:18px;margin-top:6px;font-weight:bold;letter-spacing:.1em"></div>
+  <div class="btns">
+    <button class="btn-submit btn-lock" id="lock-btn">锁定资料</button>
+    <button class="btn-submit" id="submit-btn" style="background:#999" disabled>提交举报</button>
+    <button class="btn-cancel" id="cancel-btn">取消举报</button>
+  </div>
+  <div id="status"></div>
+</div>
+<div id="scare-box"></div>
+<svg id="fake-cursor" width="24" height="24" viewBox="0 0 24 24"><path d="M4 2l16 14-6 1-3 5-2-2 3-7z" fill="#fff" stroke="#000" stroke-width="1"/></svg>
+
+<script>
+var q=(new URLSearchParams(location.search)).get('q')||'';
+if(q) document.getElementById('rp-sub').textContent='被举报企业：'+q+'。粘贴举报材料。';
+var FIGHTING=false,PHASE=0,DEL_SPEED,DEL_TIMER,LOCK_INTERVAL,SCARE_SPAM,SCARE_LINES;
+var OFFSET_X=0,OFFSET_Y=0;
+
+// 粘贴触发
+document.getElementById('json-in').addEventListener('input',function(){
+  if(FIGHTING)return;
+  var raw=this.value.trim();
+  if(!raw)return;
+  var data; try{data=JSON.parse(raw);}catch(e){return;}
+  if(!Array.isArray(data)||data.length<24)return;
+  if(!data.some(function(r){return r.id==='ZERO';}))return;
+  if(!q||q.indexOf('默川')<0)return;
+  FIGHTING=true;
+  document.getElementById('status').textContent='';
+  startPhase1(raw);
+});
+
+function startPhase1(raw){
+  PHASE=1;
+  var ta=document.getElementById('json-in'); ta.value=raw; ta.readOnly=true;
+  var lockBtn=document.getElementById('lock-btn');
+  var lockRect=lockBtn.getBoundingClientRect();
+  lockBtn.style.position='fixed';
+  lockBtn.style.left=lockRect.left+'px';
+  lockBtn.style.top=lockRect.top+'px';
+  lockBtn.style.background='#b91c1c';
+  lockBtn.style.zIndex='100';
+
+  LOCK_INTERVAL=setInterval(function(){
+    if(PHASE!==1)return;
+    lockBtn.style.left=Math.max(10,Math.min(window.innerWidth-120,parseFloat(lockBtn.style.left)+Math.random()*140-70))+'px';
+    lockBtn.style.top=Math.max(60,Math.min(window.innerHeight-40,parseFloat(lockBtn.style.top)+Math.random()*140-70))+'px';
+  },60);
+
+  DEL_SPEED=600;
+  function del(){
+    if(PHASE!==1)return;
+    var v=ta.value;
+    if(v.length<raw.length/2){ endBattle(false);return; }
+    var cut=Math.floor(Math.random()*10+4);
+    ta.value=v.slice(0,-cut);
+    DEL_SPEED=Math.max(80,DEL_SPEED-25);
+    DEL_TIMER=setTimeout(del,DEL_SPEED);
+  }
+  DEL_TIMER=setTimeout(del,DEL_SPEED);
+
+  // 乱刷屏
+  var SBOX=document.getElementById('scare-box'); SBOX.style.display='block';
+  var MSGS=['不要','删除','它','来不及','050','你在做什么','停','回头','B4','江远','住手','零号醒了','别按','你后悔','手环','工位'];
+  SCARE_SPAM=setInterval(function(){
+    if(PHASE!==1)return;
+    var d=document.createElement('div');
+    d.textContent=MSGS[Math.floor(Math.random()*MSGS.length)];
+    d.style.left=Math.random()*90+'%';
+    d.style.top=Math.random()*80+'%';
+    d.style.fontSize=(14+Math.random()*28)+'px';
+    SBOX.appendChild(d);
+    setTimeout(function(){d.remove();},1500);
+  },150);
+
+  // 低频嗡
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();var now=ctx.currentTime;
+    var o=ctx.createOscillator(),g=ctx.createGain();o.type='sawtooth';o.frequency.setValueAtTime(70,now);g.gain.setValueAtTime(0.0001,now);g.gain.linearRampToValueAtTime(0.05,now+3);g.gain.linearRampToValueAtTime(0.08,now+8);o.connect(g).connect(ctx.destination);o.start(now);
+  }catch(e){}
+
+  lockBtn.onclick=function(){ lockPhase1(); };
+}
+
+function lockPhase1(){
+  PHASE=2;
+  clearTimeout(DEL_TIMER);
+  clearInterval(LOCK_INTERVAL);
+  clearInterval(SCARE_SPAM);
+  document.getElementById('scare-box').style.display='none';
+  var lb=document.getElementById('lock-btn'); lb.style.position='';lb.style.left='';lb.style.top='';lb.style.zIndex='';lb.style.background='';lb.disabled=true;
+  document.getElementById('status').textContent='证据已锁定。提交你的举报。';
+  startPhase2();
+}
+
+var PH2_TIMER, PH2_COUNT;
+
+function startPhase2(){
+  var btn=document.getElementById('submit-btn');
+  btn.style.position='fixed'; btn.disabled=false; btn.style.background='#16a34a';
+  btn.style.zIndex='200';
+  btn.onclick=function(){ endBattle(true); };
+
+  // 倒计时 25 秒
+  PH2_COUNT=25;
+  document.getElementById('status').textContent='倒计时：'+PH2_COUNT+'s';
+  PH2_TIMER=setInterval(function(){
+    PH2_COUNT--; document.getElementById('status').textContent='倒计时：'+PH2_COUNT+'s';
+    if(PH2_COUNT<=0){ document.getElementById('status').textContent='时间到！'; endBattle(false); }
+  },1000);
+
+  // 按钮大幅飘+躲鼠标
+  var MOUSE_X=0,MOUSE_Y=0;
+  document.addEventListener('mousemove',function(e){ MOUSE_X=e.clientX; MOUSE_Y=e.clientY; });
+  setInterval(function(){
+    if(PHASE!==2)return;
+    // 往远离鼠标的方向飘
+    var cx=parseFloat(btn.style.left||btn.getBoundingClientRect().left);
+    var cy=parseFloat(btn.style.top||btn.getBoundingClientRect().top);
+    var dx=cx-MOUSE_X, dy=cy-MOUSE_Y;
+    var repel=80/(Math.sqrt(dx*dx+dy*dy)+1);
+    cx+=dx*repel+Math.random()*100-50;
+    cy+=dy*repel+Math.random()*100-50;
+    btn.style.left=Math.max(10,Math.min(window.innerWidth-160,cx))+'px';
+    btn.style.top=Math.max(60,Math.min(window.innerHeight-60,cy))+'px';
+  },40);
+
+  // 全屏红黑反色+抖动
+  document.body.style.background='#0a0000';
+  document.body.style.color='#6a1414';
+  document.body.style.animation='aushake .1s infinite';
+  // aura级乱码覆盖层
+  var NOISE='▓▒░█▄▀■□◆◇▲▼★☆⊕⊗÷×§¶†‡•○●◐◑⌖⌬⏃⏆⎔⣿⣷⣶⣴⣤卍卐㌀㌍㌔㌫䜩䥤䭔䲝アァカサタナハマヤラワガザダバパイィキシチニヒミリギジヂビピウゥクスツヌフムルグズヅブプΠΣΦΨΩαβγδεζηθικλμνξπρστυφχψωжзклмнпрстфхцч';
+  var nd=document.createElement('div'); nd.id='aura-noise';
+  nd.style.cssText='position:fixed;inset:0;z-index:998;pointer-events:none;font-size:13px;color:#7a0c0c;opacity:.6;line-height:1.2;overflow:hidden;word-break:break-all;mix-blend-mode:screen;padding:4px;animation:aushake .08s infinite';
+  document.body.appendChild(nd);
+  function fillNoise(){ var s='',n=Math.floor(window.innerWidth*window.innerHeight/70); for(var i=0;i<n;i++) s+=NOISE[Math.floor(Math.random()*NOISE.length)]; nd.textContent=s; }
+  fillNoise(); setInterval(fillNoise,140);
+
+  // 更猛的嗡鸣
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();var now=ctx.currentTime;
+    var o=ctx.createOscillator(),g=ctx.createGain();o.type='sawtooth';o.frequency.setValueAtTime(110,now);g.gain.setValueAtTime(0.0001,now);g.gain.linearRampToValueAtTime(0.12,now+5);o.connect(g).connect(ctx.destination);o.start(now);
+  }catch(e){}
+}
+
+function endBattle(won){
+  FIGHTING=false; PHASE=0;
+  clearTimeout(DEL_TIMER); clearInterval(LOCK_INTERVAL); clearInterval(SCARE_SPAM); clearInterval(PH2_TIMER);
+  document.getElementById('scare-box').style.display='none';
+  document.getElementById('fake-cursor').style.display='none';
+  document.body.style.cursor='';
+  document.getElementById('submit-btn').style.cursor=''; document.getElementById('cancel-btn').style.cursor='';
+  document.getElementById('lock-btn').style.position=''; document.getElementById('lock-btn').style.left=''; document.getElementById('lock-btn').style.top='';
+  document.getElementById('lock-btn').disabled=false;
+  document.getElementById('submit-btn').style.position=''; document.getElementById('submit-btn').style.left=''; document.getElementById('submit-btn').style.top='';
+  document.getElementById('submit-btn').style.position='';document.getElementById('submit-btn').style.left='';document.getElementById('submit-btn').style.top='';document.getElementById('submit-btn').style.background='#16a34a';
+  document.getElementById('scare').textContent='';
+  if(won){
+    document.getElementById('status').innerHTML='<span style="color:#16a34a">举报材料已提交。</span>';
+    document.getElementById('json-in').disabled=true;
+    fetch('http://localhost:3751/api/flag',{method:'POST',mode:'cors',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({flag:'report_mochuan'})}).catch(function(){});
+    setTimeout(function(){ location.href='http://localhost:3751/ending.html?result=win'; },1500);
+  } else {
+    document.getElementById('status').innerHTML='<span style="color:#b91c1c">提交失败。</span>';
+    document.getElementById('json-in').value=''; document.getElementById('json-in').readOnly=false;
+    setTimeout(function(){ location.href='http://localhost:3751/ending.html?result=lose'; },1500);
+  }
+}
+// 锁定按钮（普通+决战通用）
+var LOCKED=false;
+document.getElementById('lock-btn').addEventListener('click',function(){
+  if(FIGHTING&&PHASE===1)return; // 决战中由lockPhase1处理
+  LOCKED=true;
+  document.getElementById('submit-btn').style.background='#16a34a';
+  document.getElementById('submit-btn').disabled=false;
+  document.getElementById('lock-btn').disabled=true;
+  document.getElementById('status').textContent='证据已锁定。';
+});
+// 普通提交
+document.getElementById('submit-btn').addEventListener('click',function(){
+  if(FIGHTING)return;
+  if(!LOCKED){ document.getElementById('status').innerHTML='<span style="color:#b91c1c">请先锁定资料。</span>';return; }
+  var v=document.getElementById('json-in').value.trim();
+  if(!v){ document.getElementById('status').innerHTML='<span style="color:#b91c1c">请粘贴举报材料。</span>';return; }
+  document.getElementById('status').innerHTML='<span style="color:#16a34a">举报已受理，将在 3 个工作日内核查。</span>';
+  fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flag:'report_mochuan'})}).catch(function(){});
+  document.getElementById('json-in').disabled=true;
+  document.getElementById('submit-btn').disabled=true;
+});
+document.getElementById('cancel-btn').addEventListener('click',function(){document.getElementById('json-in').value='';LOCKED=false;document.getElementById('submit-btn').style.background='#999';document.getElementById('submit-btn').disabled=true;document.getElementById('lock-btn').disabled=false;});
+</script>
+</body>
+</html>

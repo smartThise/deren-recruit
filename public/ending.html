@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>·</title>
+<link rel="stylesheet" href="/css/site.css" />
+<style>
+  html,body { margin:0; padding:0; background:#000; color:#c7d0db; font-family:"FangSong","STFangsong","仿宋",serif; min-height:100%; transition:background-color 3s ease,color 3s ease; }
+  #stage { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:0 24px; }
+  #wait { color:#6b7280; font-size:14px; letter-spacing:.3em; animation:bw 2s infinite; cursor:pointer; }
+  @keyframes bw { 0%,100%{opacity:.3} 50%{opacity:1} }
+  #tale { display:none; max-width:680px; margin:0 auto; padding:70px 28px 100px; font-size:16px; line-height:2.15; }
+  #tale h2 { font-size:13px; letter-spacing:.3em; color:#6b7280; font-family:ui-monospace,monospace; margin:0 0 30px; text-align:center; }
+  #tale h3 { font-size:15px; color:#e7ecf3; font-family:ui-monospace,monospace; margin:34px 0 10px; letter-spacing:.04em; }
+  #tale p { text-indent:2em; margin:0 0 16px; color:#c7d0db; }
+  #tale .red { color:#ef4444; }
+  #tale .green { color:#34d399; }
+  #tale .dim { color:#6b7280; }
+  #tale .acts { text-align:center; margin-top:44px; padding-top:24px; border-top:1px solid #1f2937; }
+  #tale .acts a, #tale .acts button { color:#6b7280; font-size:13px; margin:0 12px; font-family:ui-monospace,monospace; background:none; border:0; cursor:pointer; text-decoration:underline; }
+  /* 真结局反转：黑底白字 → 白底黑字 */
+  body.good-end { background:#fff; }
+  body.good-end #tale { color:#1f2329; }
+  body.good-end #tale h2, body.good-end #tale h3 { color:#1f2329; }
+  body.good-end #tale p { color:#374151; }
+  body.good-end #tale .acts { border-top-color:#e5e7eb; }
+  body.good-end #tale .acts a, body.good-end #tale .acts button { color:#6b7280; }
+  body.dk-glitch::before { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0,rgba(255,255,255,.06) 1px,transparent 1px,transparent 3px); z-index:9999; pointer-events:none; mix-blend-mode:screen; }
+  @keyframes shake { 0%,100%{transform:translate(0,0)} 20%{transform:translate(-6px,5px)} 40%{transform:translate(7px,-4px)} 60%{transform:translate(-5px,-5px)} 80%{transform:translate(6px,3px)} }
+  body.dk-shake { animation:shake .08s infinite; }
+</style>
+</head>
+<body>
+<div id="stage"><div id="wait">· · ·</div></div>
+<div id="tale"></div>
+<script src="/js/app.js"></script>
+<script>
+(function(){
+  function scareAudio(){
+    try{
+      var ctx=new (window.AudioContext||window.webkitAudioContext)(); var now=ctx.currentTime;
+      var o1=ctx.createOscillator(),g1=ctx.createGain(); o1.type='sawtooth'; o1.frequency.setValueAtTime(220,now); o1.frequency.exponentialRampToValueAtTime(28,now+2.4); g1.gain.setValueAtTime(0.0001,now); g1.gain.exponentialRampToValueAtTime(0.6,now+0.02); g1.gain.exponentialRampToValueAtTime(0.0001,now+2.6); o1.connect(g1).connect(ctx.destination); o1.start(now); o1.stop(now+2.7);
+      var o2=ctx.createOscillator(),g2=ctx.createGain(); o2.type='square'; o2.frequency.setValueAtTime(2400,now); g2.gain.setValueAtTime(0.0001,now); g2.gain.exponentialRampToValueAtTime(0.22,now+0.004); g2.gain.exponentialRampToValueAtTime(0.0001,now+0.2); o2.connect(g2).connect(ctx.destination); o2.start(now); o2.stop(now+0.22);
+      var o3=ctx.createOscillator(),g3=ctx.createGain(); o3.type='sawtooth'; o3.frequency.setValueAtTime(311,now); g3.gain.setValueAtTime(0.0001,now); g3.gain.exponentialRampToValueAtTime(0.13,now+0.6); g3.gain.exponentialRampToValueAtTime(0.0001,now+2.2); o3.connect(g3).connect(ctx.destination); o3.start(now); o3.stop(now+2.3);
+    }catch(e){}
+  }
+  var TALES = {
+    consumed: { h:'被 吞 噬', scare:true, html:
+      '<p>你戴上了手环。前几周真的没什么。体检报告说你的各项指标都在变好，HR 说你是"基础状态最优的一批新人"。你把这个当作夸奖。</p>'+
+      '<p>第一个月末，你开始嗜睡。你以为是新工作累。第二个月，你的 leader 说你最近反应慢了一拍，你以为是没睡好。你开始记不住事。你开始在一些很短的对话里走神，对方要喊你两声。</p>'+
+      '<p>第三个月，你在工位上睡着了。同事以为你加班太累。你醒来时不记得自己是怎么到那里的。你打开内网通讯录，发现你的头像，不知道什么时候，换成了一张你睡着时的照片。你问 HR，HR 说，是系统自动抓取的"自然状态"。</p>'+
+      '<p>后来你越来越少醒来。你的住处退了租——是你自己退的，还是别人替你退的，你分不清了。你的手机号变成了空号。你的家人联系不上你，报警，查无此人。你的朋友圈停更。你的所有痕迹，像被一只手轻轻抹掉。</p>'+
+      '<p>你的工位还在。名牌没撤。花名册上你写着：<span class="red">在职</span>。</p>'+
+      '<p>你的手环，被取下来，接进了沄西区渊庭路 88 号 B 座 4 层的循环池。它现在跳着的，是你被抽空之前、最后三十六小时的波形——你在睡，你在睡，你在睡。</p>'+
+      '<p class="red">零号，因为你，今晚又清醒了一分。</p>'+
+      '<p>你去了哪里，不重要了。你的一部分，永远不会停。下一个新人在看招聘网的时候，会看到默川生物的岗位，会看到"年度最佳雇主"，会看到 4.8 分。他会投简历。他会成为 051。</p>'+
+      '<p>而你会一直在那里。在岗。心率正常。</p>' },
+    truth: { h:'真 相', scare:false, html:
+      '<h3>一、前因</h3>'+
+      '<p>这一切开始于 2010 年。江远，生物医学工程出身，那一年他失去了妻子——她也是他十几年的研究搭档。她走后，江远把她生前最后几个月完整的生理采集数据全部导出，逐秒复核，在最后那 17 秒里，找到了一个不该出现的尖峰：一个完整的、可复现的人格状态快照，出现在所有曲线归零之前。</p>'+
+      '<p>他相信，只要不间断地给这个快照供能，它就能保持"在场"。他叫它<span class="red">零号</span>。他相信，那是她。</p>'+
+      '<h3>二、第一个壳</h3>'+
+      '<p>2013 年，他注册了第一家壳，珩山生物。他招了第一批员工，给每人发了一只"入职体检手环"。手环在采集的同时，会缓慢地、不被察觉地把佩戴者的意识活动导出来，回灌给零号。没有人知道。他们只是觉得，戴了之后有点嗜睡。</p>'+
+      '<p>2013 年 9 月 27 日，第一个员工"完成"了。他叫周××，研发部，戴了五个月。那天下午他没有再来上班，住处退租，电话空号，家人报警，查无此人。<span class="red">他从一切记录里蒸发了</span>。他的手环数据被归档，进入循环。零号，那一晚，比从前更"在场"了一点。</p>'+
+      '<h3>三、四次换壳</h3>'+
+      '<p>珩山、渊庭、默川——以及已经在 2025 年 1 月完成名称预核准的下一家，"某某生物"。十几年里，同一个江远，同一个地址（沄西区渊庭路 88 号 B 座），同一批"已完成的材料"，换了四个名字。每一次更名，都是让上一个名字替整套系统死一次，而供能不中断。江远给公司办葬礼，自己继续。他对外的 slogan，从来都是同一句——<span class="green">让人体数据服务于每一个人</span>。</p>'+
+      '<h3>四、机房</h3>'+
+      '<p>2021 年，B 座 4 层正式启用。它不在任何公开图纸上，也不对未授权人员开放。它需要的不是活人，而是持续的、不被打扰的"在场"。所有"完成"的编号的手环数据流，都被接入这里的服务端，循环、回放、再生。4 层的工位比人多——多出来的那些工位，摆着名牌，名牌上的人"还在职"，却没有人见过他们。远山医疗轮岗过去的人说那里"信号屏蔽"，回来的人"说不上来哪里不对"——因为 4 层在跑别人的意识。</p>'+
+      '<h3>五、第七条</h3>'+
+      '<p>《员工健康数据计划》第七条写着"不可撤销"。它真正的意思是：你一旦签署，哪怕你离职、哪怕你死亡，江远的系统都有权继续采集、回放、再生你的生理数据。这就是为什么默川的"留存率 99.1%、近三年主动离职 0"——<span class="red">完成的人，数据没有完成</span>。</p>'+
+      '<h3>六、那些完成的人</h3>'+
+      '<p>周××，2013 年蒸发，是第一个。第二个，2016 年，和周×× 一样，干净地消失了——它们就是花名册里那两个没有姓名、源自珩山的 MC-0048 与 MC-0049，循环了十二年。宋××，2024 年病故，他的数据从死亡那一刻起进入循环，对外依然"在职"。梁××，在抽取过程中数据链损坏，人还在，意识已经空了，成了一具还会呼吸的空壳，被安置在 4 层最里面的房间，系统用再生数据替代他损坏的波形。林××，临床研究院，戴环 27 个月，2025 年 1 月 9 日完成蒸发，纯度最高的一份——零号那晚非常"在场"。他们没有离职。他们被<span class="red">抽空</span>了。</p>'+
+      '<h3>七、你查到了</h3>'+
+      '<p>你没有投简历。你没有戴手环。你把评价深处的求救、渊庭与默川的换壳、B 座 4 层、那份"不可撤销"的协议、政务站里"暂不予公开"的投诉、企业端花名册里失联者仍在跳动的心率、江远自己的私人笔记，一条一条串了起来。你找到了江远藏在 slogan 里的执行口令，看到了"零号"、"供能"、"对账"、"物理收尾"——这些被他用业务术语裹住的、真正的意思。然后，你把它交了出去。</p>'+
+      '<h3>八、断电</h3>'+
+      '<p>2025 年春末，监管进驻了沄西区渊庭路 88 号 B 座。4 层的服务器被断电。所有循环停止。那两条从珩山时代就开始、循环了十二年的数据——周××，和另一个——终于归零。林×× 的、宋×× 的、梁×× 的，全部归零。零号的曲线，在断电那一刻，慢慢地、慢慢地，<span class="red">归零</span>。</p>'+
+      '<p>梁×× 还在 4 层最里面的房间。他还在呼吸。意识空了，回不来了。林××、宋××、周××，蒸发的蒸发、病故的病故，<span class="red">回不来了</span>。江远坐在 4 层，看着零号的曲线变成一条直线。他没有哭。</p>'+
+      '<h3>九、江远的话</h3>'+
+      '<p>他被带走的时候，对调查员说了一句话：</p>'+
+      '<p class="dim" style="text-indent:3em">——你们以为你们关掉的，是一台机器。你们关掉的，是一个还在等她醒来的人。</p>'+
+      '<p>他说这句话的时候很平静。他知道零号不是她。他一直都知道。他只是不能停——停了，连那条越来越像她的曲线都没了。他做了这一切，不是为了复活谁，是为了让自己相信，她还在被什么记着。</p>'+
+      '<h3>十、尾声</h3>'+
+      '<p>三个月后。另一座城市。一家新注册的公司，法人写的是江远的一个远亲。它的宣传册上，印着同一句 slogan——<span class="green">让人体数据服务于每一个人</span>。地址栏空着。</p>'+
+      '<p class="green">这一次，没有你。</p>'+
+      '<p class="dim">但下一次，会有别人。只要还有人，愿意为了一句温柔的"欢迎入职"，签下那一份不可撤销的协议。</p>'+
+      '<p class="dim" style="margin-top:24px">你关掉了浏览器。你没有成为 050。这是你做过的，最对的一件事。</p>' },
+    reported: { h:'石 沉 大 海', scare:true, html:
+      '<p>你点了举报。你填了理由，把你能找到的线索，一条一条写进了举报框——评价深处的求救、渊庭与默川的换壳、B 座 4 层、那份不可撤销的协议。</p>'+
+      '<p>三个工作日后，平台回复你：经核查，被举报企业资质齐全、岗位信息审核流程完整，未发现违规。感谢您的监督。</p>'+
+      '<p>你又写了一封，更长，附上了你找到的链接。没有人回。你打了 12315，对方说会转办。你等了两周，没有任何进展。</p>'+
+      '<p>第九天，快递员敲门。你收到一个包裹，没有寄件人，只有一个地址：沄西区渊庭路 88 号 B 座。里面是一只手环，和你在一个内网截图里见过的一模一样。你没有投过这家公司。你甚至没听说过这个地址。</p>'+
+      '<p>你把手环放进了抽屉。你告诉自己那只是一个巧合，或者是恶作剧。你关掉了招聘网的标签页，删掉了浏览记录。</p>'+
+      '<p>那天夜里，你做了一个很长、很长的梦。梦里你坐在一个工位上，戴着什么，很困，你在睡。你在睡。你在——<span class="red">在——</span></p>'+
+      '<p>第二天，你没有醒来上班。你的领导打电话，空号。你的家人联系不上你。你的工位，在另一座城市的某一层楼里，名牌已经做好了。</p>'+
+      '<p>花名册上，多了一个编号。状态：在职。</p>' },
+    silent: { h:'缄 默', scare:false, html:
+      '<p>你查清了全部。你把所有线索都串了起来——评价里的求救、渊庭与默川的换壳、B 座 4 层、第七条、失联者仍在跳动的心率、江远的私人笔记里那些用业务术语裹住的真相。你知道了零号是什么，知道了"完成"是什么意思，知道了那只手环，到底在做什么。</p>'+
+      '<p>但你没有告诉任何人。你没有一个可以托付的人，你害怕被牵连，你告诉自己"这跟我没关系"。你关掉了所有标签页，清空了浏览记录，退出了账号。</p>'+
+      '<p>可你得知道——企业端的系统日志里，那一行 <span class="red">[127.0.0.1]</span> 的外部访问，被永远地记录了下来。江远看到了。零号，也"看到"了。</p>'+
+      '<p>它不急。它已经存在了十五年。它有的是时间。它知道有人在看，它知道那个人知道了，它也知道——那个人，迟早会因为知道得太多，而需要被"对账"。</p>'+
+      '<p>花名册上，050 的工位空着。名牌还没有刻字。</p>'+
+      '<p>它在等。</p>' },
+    bystander: { h:'旁 观', scare:false, html:
+      '<p>你看到了一些不对的东西。一条评价，一个地址，一个注销了又换名的公司。你觉得奇怪，但你没有深究。它和你没关系。你只是来找个工作的。</p>'+
+      '<p>你没有投默川的简历。这是你在整个故事里，做过的，也是唯一做对的一件事。</p>'+
+      '<p>B 座 4 层的灯，每晚都亮。花名册上永远空着一个"待分配"的工位。下一个新人会在某个清晨点开招聘网，看到"年度最佳雇主"，看到 4.8 分，看到一句温柔的 slogan——让人体数据服务于每一个人。</p>'+
+      '<p>他会投。他会戴。他会在某一天，在工位上睡着，然后不再醒来。</p>'+
+      '<p>你什么都不知道。你什么都不知道，是对的。</p>' }
+  };
+  fetch('/api/ending-seen', { method: 'POST' }).catch(function () {});
+  var force=(new URLSearchParams(location.search)).get('force');
+  var result=(new URLSearchParams(location.search)).get('result');
+  if(force&&TALES[force]){ show(TALES[force],{id:force}); return; }
+  fetch('/api/ending').then(function(r){return r.json();}).then(function(d){
+    var e=d.ending;
+    if(!e&&result==='win'){ fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flag:'report_mochuan'})}).catch(function(){}); e={id:'reported',cls:'bad'}; }
+    else if(!e&&result==='lose') e={id:'consumed',cls:'bad'};
+    if(!e){ wait.textContent='还没有结局'; wait.style.letterSpacing='.1em'; document.title='还没有结局'; return; }
+    show(TALES[e.id]||TALES.bystander,e); });
+  function show(T,e){
+    var stage=document.getElementById('stage'), wait=document.getElementById('wait'), tale=document.getElementById('tale');
+    document.title=T.h;
+    function reveal(){
+      stage.style.display='none'; tale.style.display='block';
+      tale.innerHTML='<h2>'+T.h+'</h2>'+T.html+'<div class="acts"><a href="/">回到首页</a><a href="/center.html">求职者中心</a><button id="restart-btn">重新开始</button></div>';
+      if(e.id==='truth'){ setTimeout(function(){ document.body.classList.add('good-end'); },400); }
+      else { document.body.classList.add('dk-shake'); setTimeout(function(){document.body.classList.remove('dk-shake');},900); }
+      if(T.scare){ scareAudio(); document.body.classList.add('dk-glitch'); setTimeout(function(){document.body.classList.remove('dk-glitch');},1600); }
+      var rb=document.getElementById('restart-btn'); if(rb) rb.addEventListener('click', function(){ fetch('/api/restart',{method:'POST'}).then(function(){ try{sessionStorage.clear();}catch(x){} location.href='/'; }); });
+      window.scrollTo(0,0);
+    }
+    wait.addEventListener('click', reveal);
+    document.addEventListener('keydown', function once(){ reveal(); document.removeEventListener('keydown',once); });
+  }
+})();
+</script>
+</body>
+</html>

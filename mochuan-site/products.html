@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>产品技术 · 默川生物</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system,"PingFang SC","Microsoft YaHei",sans-serif; color: #0f172a; background: #fff; }
+  a { color: inherit; text-decoration: none; }
+  .topbar { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.92); backdrop-filter: blur(10px); border-bottom: 1px solid #eee; }
+  .topbar-in { max-width: 1140px; margin: 0 auto; height: 62px; display: flex; align-items: center; padding: 0 24px; gap: 36px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 750; color: #0f766e; }
+  .logo .mk { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg,#0f766e,#14b8a6); color: #fff; display: grid; place-items: center; font-weight: 800; }
+  .nav { display: flex; gap: 26px; font-size: 14.5px; color: #475569; }
+  .nav a:hover { color: #0f766e; }
+  .sec { max-width: 1140px; margin: 64px auto; padding: 0 24px; }
+  .sec h1 { font-size: 32px; font-weight: 800; letter-spacing: -.02em; }
+  .sec .sub { color: #64748b; margin-top: 8px; font-size: 16px; }
+  .grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 32px; }
+  .card { border: 1px solid #eef2f6; border-radius: 12px; padding: 28px 24px; background: #fcfdfd; }
+  .card .ic { width: 44px; height: 44px; border-radius: 10px; background: #ccfbf1; color: #0f766e; display: grid; place-items: center; font-size: 22px; margin-bottom: 14px; }
+  .card h3 { font-size: 18px; margin-bottom: 6px; }
+  .card p { color: #64748b; font-size: 14px; line-height: 1.8; }
+  .foot { background: #0f172a; color: #64748b; padding: 36px 24px; font-size: 13px; }
+  .foot-in { max-width: 1140px; margin: 0 auto; line-height: 1.9; }
+</style>
+</head>
+<body>
+<div class="topbar"><div class="topbar-in">
+  <a class="logo" href="/"><span class="mk">默</span> 默川生物</a>
+  <nav class="nav">
+    <a href="/">首页</a><a href="/products.html">产品技术</a><a href="/research.html">研究中心</a><a href="/news.html">新闻</a><a href="http://localhost:3751/company.html?slug=mochuan-bio" target="_blank">加入我们</a>
+  </nav>
+</div></div>
+
+<section class="sec">
+  <h1>产品与技术</h1>
+  <p class="sub">从信号采集到临床洞见，默川构建了完整的人体数据闭环。</p>
+  <div class="grid">
+    <div class="card"><div class="ic">◉</div><h3>健康数据平台 4.0</h3><p>多源生理信号的统一采集、清洗与建模平台。支持毫秒级实时流处理，已通过国家信息安全等级保护三级。目前已接入超过一千二百万条持续更新的健康基线。</p></div>
+    <div class="card"><div class="ic">⌬</div><h3>采集设备矩阵</h3><p>自研可穿戴与非接触式采集设备，覆盖睡眠、心电、活动、情绪等维度。设备设计为 7×24 小时无感运行，适配办公与居家场景。</p></div>
+    <div class="card"><div class="ic">✚</div><h3>临床转化应用</h3><p>与逾八十所三甲医院共建联合实验室，将健康数据模型应用于早筛、慢病管理与个性化干预方案。</p></div>
+  </div>
+</section>
+
+<footer class="foot"><div class="foot-in">
+  <div>© 2024 默川生物科技（沄洲）有限公司 · Mochuan Bio</div>
+  <div>地址：沄洲市沄西区南湖区渊庭路 88 号 · 电话：0731-xxxx-0888</div>
+</div></footer>
+</body>
+</html>

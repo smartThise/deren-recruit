@@ -1,0 +1,14 @@
+# 得人招聘 - 站点爬虫规则
+# 本站内容遵循 robots 协议，以下路径不对搜索引擎开放。
+
+User-agent: *
+Allow: /
+Disallow: /archive/
+Disallow: /employer/
+Disallow: /internal/
+Disallow: /api/business/
+Disallow: /api/internal/
+Disallow: /help/compliance/
+
+Sitemap: http://localhost:3751/sitemap.xml
+# /archive/ — yuanting legacy records — requires auth; check response headers for API

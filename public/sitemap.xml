@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>http://localhost:3751/</loc><priority>1.0</priority></url>
+  <url><loc>http://localhost:3751/search.html</loc><priority>0.9</priority></url>
+  <url><loc>http://localhost:3751/companies.html</loc><priority>0.8</priority></url>
+  <url><loc>http://localhost:3751/community.html</loc><priority>0.6</priority></url>
+  <url><loc>http://localhost:3751/announce.html</loc><priority>0.5</priority></url>
+  <url><loc>http://localhost:3751/company.html?slug=starriver</loc><priority>0.7</priority></url>
+  <url><loc>http://localhost:3751/company.html?slug=yuanshan</loc><priority>0.7</priority></url>
+  <url><loc>http://localhost:3751/company.html?slug=morningglow</loc><priority>0.7</priority></url>
+  <url><loc>http://localhost:3751/company.html?slug=bluewhale</loc><priority>0.7</priority></url>
+  <url><loc>http://localhost:3751/company.html?slug=skyforge</loc><priority>0.7</priority></url>
+  <url><loc>http://localhost:3751/company.html?slug=mochuan-bio</loc><priority>0.7</priority></url>
+</urlset>

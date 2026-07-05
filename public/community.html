@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>职言职语 · 得人招聘</title>
+<link rel="stylesheet" href="/css/site.css" />
+</head>
+<body data-page="community">
+<header class="nav"><div class="nav-inner">
+  <a class="brand" href="/"><span class="logo">得</span>得人招聘</a>
+  <nav class="nav-links"><a href="/">首页</a><a href="/search.html?q=">找工作</a><a href="/companies.html">看公司</a><a href="/community.html">职言职语</a><a href="/announce.html">平台公告</a></nav>
+  <div class="nav-spacer"></div>
+  <div id="nav-user"><button class="btn btn-line btn-sm" id="go-login">登录 / 注册</button></div>
+</div></header>
+
+<main class="wrap" style="padding-top:26px">
+  <div id="cm-list-wrap">
+    <div class="section-head"><h2>职言职语</h2><span class="more">求职者匿名交流</span></div>
+    <div class="list-card" id="cm-list"></div>
+  </div>
+  <div id="cm-detail" style="display:none">
+    <div style="color:#6b7280;font-size:13px;margin-bottom:6px"><a href="/community.html">← 返回列表</a></div>
+    <h1 id="cm-title" style="font-size:20px;margin:0 0 6px"></h1>
+    <div id="cm-meta" style="color:#9aa1ab;font-size:13px;margin-bottom:16px"></div>
+    <div class="panel-sec" style="padding:6px 22px"><div id="cm-posts"></div></div>
+  </div>
+</main>
+
+<footer class="footer"><div class="footer-inner">
+  <span>© 2024 得人招聘 deren.cxn</span><span class="sep">·</span><span>沄ICP备2024xxxxx号-3</span>
+</div></footer>
+
+<div class="modal-mask" id="login-mask"><div class="modal">
+  <h3>登录得人招聘</h3><div class="m-sub">新用户将自动注册。</div>
+  <input id="login-name" type="text" placeholder="昵称（可留空）" />
+  <input id="login-phone" type="text" placeholder="手机号" />
+  <button class="btn btn-primary" id="login-submit">登录 / 注册</button>
+</div></div>
+<div class="toast" id="toast"></div>
+<script src="/js/app.js"></script>
+</body>
+</html>

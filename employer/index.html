@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="robots" content="noindex" />
+<title>默川生物 · HR 管理后台</title>
+<link rel="stylesheet" href="/css/emp.css" />
+</head>
+<body>
+<!-- 口令门 -->
+<div id="gate" class="gate">
+  <div class="gate-card">
+    <div class="glogo">默川生物 · HR 管理后台</div>
+    <div class="gsub">internal · 仅授权 HR 访问 · :8849</div>
+    <form id="auth">
+      <input id="pass" type="password" placeholder="访问口令" autocomplete="off" spellcheck="false" />
+      <button type="submit">进入</button>
+    </form>
+    <div id="auth-err" class="gerr"></div>
+    <div class="ghint">此后台不对外。口令见内部迁移备忘。</div>
+  </div>
+</div>
+
+<!-- 主应用 -->
+<div id="app" style="display:none">
+  <aside class="sidebar">
+    <div class="sbrand">默川 · HR</div>
+    <nav class="snav">
+      <a class="sitem active" data-v="overview">▒ 概览</a>
+      <a class="sitem" data-v="funnel">☶ 招聘漏斗</a>
+      <a class="sitem" data-v="candidates">AttribPointer 候选人池</a>
+      <a class="sitem" data-v="roster">☰ 在职花名册</a>
+      <a class="sitem" data-v="health">♥ 健康数据看板</a>
+      <a class="sitem" data-v="onboarding">⇪ 入职预处理</a>
+      <a class="sitem" data-v="log">≣ 系统日志</a>
+      <a class="sitem" data-v="exec">★ 执行视图 <span style="color:#b91c1c">·</span></a>
+          </nav>
+    <div class="sfoot">v3.4 · build 8849<br/><span id="who">—</span></div>
+  </aside>
+
+  <main class="main">
+    <header class="top">
+      <div class="t1" id="view-title">概览</div>
+      <div class="t2"><span class="live"></span> 已认证 · 实时同步</div>
+    </header>
+    <section class="view" id="view-overview"></section>
+    <section class="view" id="view-funnel" style="display:none"></section>
+    <section class="view" id="view-candidates" style="display:none"></section>
+    <section class="view" id="view-roster" style="display:none"></section>
+    <section class="view" id="view-health" style="display:none"></section>
+    <section class="view" id="view-onboarding" style="display:none"></section>
+    <section class="view" id="view-log" style="display:none"></section>
+    <section class="view" id="view-exec" style="display:none"></section>
+    <section class="view" id="view-db" style="display:none"></section>
+  </main>
+</div>
+
+<div id="scare" class="scare"><div id="scare-txt"></div></div>
+<script src="/js/emp.js"></script>
+<style>
+html.aura-bad,html.aura-bad body{background:#0a0000!important}
+html.aura-bad body{color:#6a1414!important;animation:aushake .1s infinite}
+html.aura-bad *{color:#8a1a1a!important;background-color:transparent!important;text-shadow:0 0 1px #ff0000}
+html.aura-bad a{color:#bb2222!important}
+@keyframes aushake{0%,100%{transform:translate(0,0)}25%{transform:translate(-2px,1px)}50%{transform:translate(3px,-1px)}75%{transform:translate(-1px,-2px)}}
+html.aura-bad::after{content:'碎 噪 乱 碎 噪 噪 乱 碎 碎 噪 乱';position:fixed;inset:0;pointer-events:none;z-index:9997;font-family:monospace;font-size:9px;color:#2a0000;opacity:.16;overflow:hidden}
+html.aura-good body{background:#fff!important}
+html.aura-good::after{content:'一切都干净了。';position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;color:#1f2329;font-family:"FangSong",serif;font-size:22px;letter-spacing:.3em;z-index:9998}
+</style>
+<script>function injectNoise(){if(document.getElementById('aura-noise'))return;var d=document.createElement('div');d.id='aura-noise';d.style.cssText='position:fixed;inset:0;z-index:9996;pointer-events:none;font-size:13px;color:#7a0c0c;opacity:.62;line-height:1.2;overflow:hidden;word-break:break-all;mix-blend-mode:screen;padding:4px;animation:aushake .08s infinite';document.body.appendChild(d);var C='▓▒░█▄▀■□◆◇▲▼★☆⊕⊗÷×§¶†‡•○●◐◑⌖⌬⏃⏆⎔⣿⣷⣶⣴⣤卍卐㌀㌍㌔㌫䜩䥤䭔䲝アァカサタナハマヤラワガザダバパイィキシチニヒミリギジヂビピウゥクスツヌフムルグズヅブプΠΣΦΨΩαβγδεζηθικλμνξπρστυφχψωжзклмнпрстфхцч';function fill(){var s='',n=Math.floor(window.innerWidth*window.innerHeight/70);for(var i=0;i<n;i++)s+=C[Math.floor(Math.random()*C.length)];d.textContent=s;}fill();setInterval(fill,140);}
+fetch('/api/aura').then(function(r){return r.json()}).then(function(a){if(!a)return;if(a.endingType&&!a.endingSeen){document.body.classList.add('dk-glitch');setTimeout(function(){location.href='http://localhost:3751/ending.html';},800);return;}if(a.locked){location.href='http://localhost:3751/agreement.html';}if(a.endingType==='bad'){document.documentElement.classList.add('aura-bad');setTimeout(injectNoise,60);setInterval(function(){var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);var ns=[];while(w.nextNode())ns.push(w.currentNode);ns.forEach(function(n){var t=n.nodeValue;if(!t||!t.trim())return;var p=n.parentNode;if(!p||p.tagName==='SCRIPT'||p.tagName==='STYLE')return;var K='▓▒░█▄▀■□◆◇▲▼★☆⊕⊗÷×§¶†‡•○●◐◑⌖⌬⏃⏆⎔⣿⣷⣶⣴⣤卍卐㌀㌍㌔㌫䜩䥤䭔䲝アァカサタナハマヤラワガザダバパイィキシチニヒミリギジヂビピウゥクスツヌフムルグズヅブプΠΣΦΨΩαβγδεζηθικλμνξπρστυφχψωжзклмнпрстфхцч';var s='';for(var i=0;i<t.length;i++){var c=t[i];s+=/\s/.test(c)?c:K[Math.floor(Math.random()*K.length)];}n.nodeValue=s;});},280);}if(a.endingType==='good'){document.documentElement.classList.add('aura-good');}}).catch(function(){});</script>
+</body>
+</html>
