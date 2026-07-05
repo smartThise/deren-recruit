@@ -504,8 +504,36 @@ function handleMochuan(req, res) {
   });
 }
 
-// ---- 政务公开网 handler ----
+// ---- 政务公开网 ----
 const GOV_PUBLIC = path.join(ROOT, 'gov-site');
+function recordData(q) {
+  const name = (q || '').trim();
+  if (!name) return null;
+  if (name.indexOf('渊庭') >= 0) {
+    return { name: '渊庭生物科技（沄洲）有限公司', status: '注销', licenses: [], penalties: [], inspections: [], complaints: [], note: '主体已于 2024-07-18 注销。历史监管记录随承接主体迁移，详见关联存续主体"默川生物科技"。原招聘平台企业页已归档（archive）。' };
+  }
+  const isMochuan = name.indexOf('默川') >= 0;
+  return {
+    name: isMochuan ? '默川生物科技（沄洲）有限公司' : name,
+    status: '存续（在营）',
+    licenses: isMochuan ? [
+      { name: '高新技术企业认定', no: 'GR2024290115X', date: '2024', valid: '三年' },
+      { name: '医疗器械生产许可证', no: '沄药监械生产许 2023xxxx 号', date: '2023', valid: '五年' },
+      { name: '信息系统安全等级保护三级', no: '290115-35003', date: '2024', valid: '长期' },
+      { name: '人力资源服务许可', no: '沄人服 2024-0287', date: '2024', valid: '三年' }
+    ] : [{ name: '营业执照', no: 'FD-20XX-XXXXXX', date: '——', valid: '长期' }],
+    penalties: [],
+    inspections: [
+      { date: '2025-01', item: '日常监督检查', result: '未发现重大问题', dept: '沄西区市场监督管理局' },
+      { date: '2024-08', item: '数据合规专项检查', result: '已取得被采集方书面授权，未发现违法行为', dept: '沄西区网络安全和信息化委员会办公室' }
+    ],
+    complaints: isMochuan ? [
+      { date: '2024-11', title: '反映"员工健康数据计划"采集范围过宽（睡眠 / 情绪 / 家族病史）', from: '匿名', result: '经核查，企业已取得员工书面授权，依据现行规定未发现违法行为。', status: '已办结' },
+      { date: '2024-09', title: '反映沄西区渊庭路 88 号 B 座夜间有异常灯光与人影', from: '附近居民', result: '现场核查未见异常。', status: '已办结' },
+      { date: '2025-02', title: '（举报内容暂不予公开）', from: '匿名', result: '——', status: '暂存 · 待核实' }
+    ] : []
+  };
+}
 function handleGov(req, res) {
   const u = new URL(req.url, 'http://localhost');
   try {
