@@ -517,7 +517,7 @@ if (IS_RENDER || MAIN_ONLY) {
   const P_SITE = '/m';
   const P_GOV = '/g';
 
-  function serveStaticProd(res, root, pathname, prefix) { console.log("serveStaticProd", pathname, "root", root);
+  function serveStaticProd(res, root, pathname, prefix) {
     if (pathname.endsWith('/')) pathname = pathname + 'index.html';
     const full = path.normalize(path.join(root, pathname));
     if (!full.startsWith(root)) { res.statusCode = 403; return res.end('403'); }
@@ -576,15 +576,15 @@ if (IS_RENDER || MAIN_ONLY) {
   http.createServer((req, res) => {
     const u = new URL(req.url, 'http://localhost');
     try {
-      if (u.pathname.startsWith(P_EMP + '/') || u.pathname === P_EMP) {
+      if (u.pathname.startsWith(P_EMP)) {
         req.url = req.url.replace(P_EMP, '') || '/';
         return empHandler(req, res);
       }
-      if (u.pathname.startsWith(P_SITE + '/') || u.pathname === P_SITE) {
+      if (u.pathname.startsWith(P_SITE)) {
         req.url = req.url.replace(P_SITE, '') || '/';
         return handleMochuan(req, res);
       }
-      if (u.pathname.startsWith(P_GOV + '/') || u.pathname === P_GOV) {
+      if (u.pathname.startsWith(P_GOV)) {
         req.url = req.url.replace(P_GOV, '') || '/';
         return handleGov(req, res);
       }
