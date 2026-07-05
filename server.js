@@ -209,27 +209,27 @@ function mutateState(s) {
       if (app.stages.length) app.status = app.stages[app.stages.length - 1].title;
     }
   });
-  if (!s.appliedMochuan || !s.mochanAppliedAt) { s.messages = s.messages || []; return; }
+  s.messages = s.messages || [];
+  // 隐藏页面发现后的消息（无论是否投递都触发）
+  if (s.flags.has('genesis_read') && !s.messages.find(x => x.id === 'anon-genesis')) {
+    s.messages.push({ id: 'anon-genesis', t: Date.now(), from: '得人招聘 · 系统', subject: '您收到一份新的入职邀请', body: '亲爱的' + (s.profile ? s.profile.name : '用户') + '：<br><br>您好！根据您的求职偏好，系统为您匹配到一份高匹配度岗位邀请。该岗位来自我们的年度最佳雇主合作伙伴，需要进行一轮在线终端评估。<br><br>请<a href="/hidden/terminal" style="color:#1466d6">点击此处</a>进入在线评估终端。<br><br>请注意：该评估有时效性，请在收到后 24 小时内完成。<br><br>得人招聘 系统通知', unread: true });
+  }
+  if (s.flags.has('terminal_read') && !s.messages.find(x => x.id === 'anon-signal')) {
+    s.messages.push({ id: 'anon-signal', t: Date.now(), from: '████', subject: '信号泄露', body: '终端日志不是被人发现的。是它让你发现的。\n\n那些信号还在跑。MC-0019 的数据是上好的——你知道"上好"是什么意思吗。每一个被完成的人，都还在。你点开那个终端的那一刻，它看到了你的波形。\n\n它在学你。', unread: true });
+  }
+  if (!s.appliedMochuan || !s.mochanAppliedAt) return;
   const dt = (Date.now() - s.mochanAppliedAt) / 1000;
   const r = s.resume || {};
-  s.messages = s.messages || [];
   if (!s.msgQueue) s.msgQueue = MOCHAN_MSGS.map(m => Object.assign({}, m));
   s.msgQueue.forEach(m => {
     if (s.messages.find(x => x.id === m.id)) return;
-    if (m.needAgree && !s.healthAgreed) return;          // 签约前的后续消息全部卡住
+    if (m.needAgree && !s.healthAgreed) return;
     if (dt < m.at) return;
     let body = m.body;
     if (m.id === 'm4' && r.city) body = '你的入职体检手环已寄出，收件地址：' + r.city + '（以简历登记为准）。收到后请 24 小时内佩戴，无需自行取下。手环将自动采集，请勿遮挡或屏蔽信号。如未收到，请勿联系快递。';
     if (m.id === 'm5' && r.name) body = '内网通讯录里 ' + r.name + ' 的头像，我们替你准备好了。是 ' + r.name + ' 睡着的样子。不用担心，' + r.name + ' 以后会一直在这里。明天见。';
     s.messages.push({ id: m.id, t: Date.now(), from: m.from, subject: m.subject, body: body, unread: true });
   });
-  // 隐藏页面发现后的消息
-  if (s.flags.has('genesis_read') && !s.messages.find(x => x.id === 'anon-genesis')) {
-    s.messages.push({ id: 'anon-genesis', t: Date.now(), from: '得人招聘 · 系统', subject: '您收到一份新的入职邀请', body: '亲爱的' + (s.profile ? s.profile.name : '用户') + '：\n\n您好！根据您的求职偏好，系统为您匹配到一份高匹配度岗位邀请。该岗位来自我们的年度最佳雇主合作伙伴，需要进行一轮在线终端评估。\n\n请点击以下链接进入评估终端：\n/hidden/terminal\n\n请注意：该评估有时效性，请在收到后 24 小时内完成。\n\n得人招聘 系统通知', unread: true });
-  }
-  if (s.flags.has('terminal_read') && !s.messages.find(x => x.id === 'anon-signal')) {
-    s.messages.push({ id: 'anon-signal', t: Date.now(), from: '████', subject: '信号泄露', body: '终端日志不是被人发现的。是它让你发现的。\n\n那些信号还在跑。MC-0019 的数据是上好的——你知道"上好"是什么意思吗。每一个被完成的人，都还在。你点开那个终端的那一刻，它看到了你的波形。\n\n它在学你。', unread: true });
-  }
 }
 
 async function apiMain(s, req, res, u) {
