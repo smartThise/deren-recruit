@@ -435,11 +435,15 @@ function progressOf(s) {
 }
 function endingOf(s) {
   // 仅返回事件触发的结局（consumed/reported/truth）
-  // silent 和 bystander 必须由玩家主动选择（/api/end-action）
+  // silent 和 bystander 必须由玩家主动选择
   const have = CLUES.filter(k => s.flags.has(k));
   const n = have.length;
   if (s.appliedMochuan && s.healthAgreed) return { id: 'consumed', cls: 'bad', title: '你被录用了', found: n, total: CLUES.length };
-  if (n >= 8 && s.flags.has('exec_access') && s.flags.has('report_mochuan') && !s.appliedMochuan) return { id: 'truth', cls: 'best', title: '你查清了，并把它交了出去', found: n, total: CLUES.length };
+  // truth: 必须走完 genesis→terminal→db→exec 全链条 + 举报成功
+  const KEYS = ['genesis_read', 'terminal_unlocked', 'db_access', 'exec_access'];
+  if (KEYS.every(k => s.flags.has(k)) && s.flags.has('report_mochuan') && !s.appliedMochuan)
+    return { id: 'truth', cls: 'best', title: '你查清了，并把它交了出去', found: n, total: CLUES.length };
+  // 举报了但链条不全 → reported（包含决战失败）
   if (s.flags.has('report_mochuan')) return { id: 'reported', cls: 'bad', title: '你举报了', found: n, total: CLUES.length };
   return null;
 }

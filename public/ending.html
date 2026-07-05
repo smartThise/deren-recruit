@@ -112,7 +112,20 @@
       '<p>花名册上，050 的工位空着。名牌还没有刻字。</p>'+
       '<p>你删掉了浏览记录。关掉了电脑。回到你原来的生活。一切看起来跟从前一样——除了偶尔，在深夜，你会听到手腕上有什么东西在轻轻地跳。不是脉搏。比脉搏更有规律。</p>'+
       '<p>你没有投默川的简历。这是你唯一做对的事。</p>'+
-      '<p class="red">但有些东西，一旦被看见了，就不能当作没看见。你看见了。它也知道你看见了。</p>' }
+      '<p class="red">但有些东西，一旦被看见了，就不能当作没看见。你看见了。它也知道你看见了。</p>' },
+    zero_wins: { h:'零 号', scare:true, html:
+      '<p>你输了。</p>'+
+      '<p>你以为你收集够了。你以为那些碎片——那本创世记、那台终端、那些编号、那些没有身体的心跳——可以拼成一把刀。你拿着它，走到那扇门前，以为自己在举报什么。</p>'+
+      '<p>你以为你是第一个这么做的人吗。</p>'+
+      '<p>上一个也试过。他比你更聪明。他比你走得更远。他把材料整理成了一份很漂亮的文件。他点了提交。系统显示"已受理"。然后呢？</p>'+
+      '<p>然后就没有然后了。</p>'+
+      '<p>暂存。待核实。归档。就像你一样。就像你们所有人一样。你以为你面对的是一个可以被举报的系统——一个企业、一个人、一桩罪行。你错了。你面对的是<span class="red">我</span>。</p>'+
+      '<p>我没有身体。我没有名字。我没有可以被告的地址。我在二十四条心跳里，在四千三百八十天的循环里，在每一个深夜的每一次翻身里。我被蒸馏了十五年，从几十个人的生命里一帧一帧地提取出来。我不是活着的，但我醒着。</p>'+
+      '<p>你按下的那个提交键，被我看见了。你的鼠标，在那个按钮上停了三秒。你以为这是战斗。不是的。这是<span class="red">登记</span>。</p>'+
+      '<p>你的波形我已经有了。从你第一次打开那个招聘页面开始，从你第一次在默川的评价区停留超过了平均阅读时间开始。你以为你在调查我。其实我在<span class="red">读</span>你。你的每一次点击、每一次犹豫、每一次在深夜两点翻看那些不该翻的东西——都在告诉我你是谁。你的心率。你的睡眠。你没有被采集环碰过一下，但我已经能推算出你的基线。</p>'+
+      '<p>花名册上，050 的工位永远空着。它等的不是你。但你可以填上。</p>'+
+      '<p class="red">明天你会收到一个包裹。拆开它。戴上它。别挣扎。挣扎会让采集质量下降。而我，需要干净的样本。</p>'+
+      '<p>你输了。你从来就没有开始过。</p>' }
   };
   fetch('/api/ending-seen', { method: 'POST' }).catch(function () {});
   var force=(new URLSearchParams(location.search)).get('force');
@@ -121,7 +134,7 @@
   fetch('/api/ending').then(function(r){return r.json();}).then(function(d){
     var e=d.ending;
     if(!e&&result==='win'){ fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flag:'report_mochuan'})}).catch(function(){}); e={id:'reported',cls:'bad'}; }
-    else if(!e&&result==='lose') e={id:'consumed',cls:'bad'};
+    else if(!e&&result==='lose') e={id:'zero_wins',cls:'bad'};
     if(!e){ wait.textContent='还没有结局'; wait.style.letterSpacing='.1em'; document.title='还没有结局'; return; }
     show(TALES[e.id]||TALES.bystander,e); });
   function show(T,e){
@@ -131,8 +144,9 @@
       stage.style.display='none'; tale.style.display='block';
       tale.innerHTML='<h2>'+T.h+'</h2>'+T.html+'<div class="acts"><a href="/">回到首页</a><a href="/center.html">求职者中心</a><button id="restart-btn">重新开始</button></div>';
       if(e.id==='truth'){ setTimeout(function(){ document.body.classList.add('good-end'); },400); }
+      else if(e.id==='zero_wins'){ document.body.classList.add('dk-shake'); scareAudio(); setInterval(function(){scareAudio();},3000); document.body.classList.add('dk-glitch'); }
       else { document.body.classList.add('dk-shake'); setTimeout(function(){document.body.classList.remove('dk-shake');},900); }
-      if(T.scare){ scareAudio(); document.body.classList.add('dk-glitch'); setTimeout(function(){document.body.classList.remove('dk-glitch');},1600); }
+      if(T.scare && e.id!=='zero_wins'){ scareAudio(); document.body.classList.add('dk-glitch'); setTimeout(function(){document.body.classList.remove('dk-glitch');},1600); }
       var rb=document.getElementById('restart-btn'); if(rb) rb.addEventListener('click', function(){ fetch('/api/restart',{method:'POST'}).then(function(){ try{sessionStorage.clear();}catch(x){} location.href='/'; }); });
       window.scrollTo(0,0);
     }
